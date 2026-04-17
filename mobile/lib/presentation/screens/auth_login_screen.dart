@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/auth/auth_notifier.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/form_spacing.dart';
+import '../widgets/moroccan_card.dart';
 import '../widgets/moroccan_pattern_background.dart';
+import '../widgets/moroccan_ui_kit.dart';
 
 class AuthLoginScreen extends ConsumerStatefulWidget {
   const AuthLoginScreen({super.key});
@@ -26,6 +30,19 @@ class _AuthLoginScreenState extends ConsumerState<AuthLoginScreen> {
     super.dispose();
   }
 
+  String _loginErrorMessage(Object e) {
+    final s = e.toString();
+    if (s.contains('Connection refused') ||
+        s.contains('SocketException') ||
+        s.contains('connection error') ||
+        s.contains('Failed host lookup')) {
+      return 'Impossible de joindre l’API (port 4000). Vérifiez qu’elle tourne sur la machine hôte '
+          'et écoute sur toutes les interfaces (0.0.0.0). Sur un téléphone Android réel, '
+          'utilisez l’IP locale du PC avec --dart-define=API_BASE=…';
+    }
+    return s;
+  }
+
   Future<void> _submit() async {
     setState(() {
       loading = true;
@@ -41,7 +58,7 @@ class _AuthLoginScreenState extends ConsumerState<AuthLoginScreen> {
         context.go('/artisan');
       }
     } catch (e) {
-      setState(() => err = '$e');
+      setState(() => err = _loginErrorMessage(e));
     } finally {
       if (mounted) setState(() => loading = false);
     }
@@ -50,50 +67,103 @@ class _AuthLoginScreenState extends ConsumerState<AuthLoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Connexion')),
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: Text(
+          'Connexion',
+          style: GoogleFonts.elMessiri(fontWeight: FontWeight.w700, fontSize: 20),
+        ),
+      ),
       body: MoroccanPatternBackground(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Center(
-                child: Image.asset(
-                  'assets/branding/logo_al_asel.png',
-                  height: 100,
-                  fit: BoxFit.contain,
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Center(
+                  child: Image.asset(
+                    'assets/branding/logo_al_asel.png',
+                    height: 88,
+                    fit: BoxFit.contain,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 20),
-              TextField(
-                controller: _email,
-                keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(labelText: 'Email'),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: _password,
-                obscureText: true,
-                decoration: const InputDecoration(labelText: 'Mot de passe'),
-              ),
-              if (err != null) ...[
                 const SizedBox(height: 8),
-                Text(err!, style: const TextStyle(color: AppColors.terracotta)),
+                const MoroccanGoldBand(width: 100),
+                const SizedBox(height: 20),
+                Text(
+                  'Bienvenue',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.elMessiri(
+                    fontSize: 26,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.deepBlue,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Entrez vos identifiants pour accéder à votre espace',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.cairo(
+                    fontSize: 14,
+                    color: AppColors.muted,
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                MoroccanCard(
+                  padding: const EdgeInsets.fromLTRB(18, 22, 18, 22),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      TextField(
+                        controller: _email,
+                        keyboardType: TextInputType.emailAddress,
+                        decoration: const InputDecoration(
+                          labelText: 'Email',
+                          prefixIcon: Icon(Icons.mail_outline_rounded),
+                        ),
+                      ),
+                      FormSpacing.betweenInputs,
+                      TextField(
+                        controller: _password,
+                        obscureText: true,
+                        decoration: const InputDecoration(
+                          labelText: 'Mot de passe',
+                          prefixIcon: Icon(Icons.lock_outline_rounded),
+                        ),
+                      ),
+                      if (err != null) ...[
+                        const SizedBox(height: 12),
+                        Text(err!, style: const TextStyle(color: AppColors.terracotta, fontWeight: FontWeight.w600)),
+                      ],
+                      const SizedBox(height: 22),
+                      FilledButton(
+                        onPressed: loading ? null : _submit,
+                        child: loading
+                            ? const SizedBox(
+                                height: 22,
+                                width: 22,
+                                child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.white),
+                              )
+                            : Text('Se connecter', style: GoogleFonts.cairo(fontWeight: FontWeight.w800)),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextButton(
+                  onPressed: () => context.push('/auth/register/client'),
+                  child: Text('Créer un compte client', style: GoogleFonts.cairo(fontWeight: FontWeight.w700)),
+                ),
+                TextButton(
+                  onPressed: () => context.push('/auth/register/artisan'),
+                  child: Text('Créer un compte artisan', style: GoogleFonts.cairo(fontWeight: FontWeight.w700)),
+                ),
               ],
-              const SizedBox(height: 20),
-              FilledButton(
-                onPressed: loading ? null : _submit,
-                child: loading ? const SizedBox(height: 22, width: 22, child: CircularProgressIndicator(strokeWidth: 2)) : const Text('Se connecter'),
-              ),
-              TextButton(
-                onPressed: () => context.push('/auth/register/client'),
-                child: const Text('Créer un compte client'),
-              ),
-              TextButton(
-                onPressed: () => context.push('/auth/register/artisan'),
-                child: const Text('Créer un compte artisan'),
-              ),
-            ],
+            ),
           ),
         ),
       ),

@@ -21,6 +21,7 @@ class _ClientShellScreenState extends ConsumerState<ClientShellScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.sand,
       body: Column(
         children: [
           const ShellMessagesBar(),
@@ -54,7 +55,6 @@ class _ClientShellScreenState extends ConsumerState<ClientShellScreen> {
           ),
           NavigationDestination(icon: Icon(Icons.person_outline), selectedIcon: Icon(Icons.person), label: 'Profil'),
         ],
-        indicatorColor: AppColors.gold.withValues(alpha: 0.35),
       ),
     );
   }

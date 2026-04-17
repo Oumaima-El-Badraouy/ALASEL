@@ -8,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../core/auth/auth_notifier.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/form_spacing.dart';
 import '../../data/models/user_model.dart';
 import '../providers/app_providers.dart';
 import '../widgets/moroccan_pattern_background.dart';
@@ -283,7 +284,7 @@ class _ArtisanProfileTabScreenState extends ConsumerState<ArtisanProfileTabScree
                       border: OutlineInputBorder(),
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  FormSpacing.betweenInputs,
                   TextField(
                     controller: _lastName,
                     textCapitalization: TextCapitalization.words,
@@ -302,7 +303,7 @@ class _ArtisanProfileTabScreenState extends ConsumerState<ArtisanProfileTabScree
                       border: OutlineInputBorder(),
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  FormSpacing.betweenInputs,
                   TextField(
                     controller: _description,
                     maxLines: 5,

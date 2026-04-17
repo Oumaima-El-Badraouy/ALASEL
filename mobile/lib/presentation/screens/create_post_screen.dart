@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/form_spacing.dart';
 import '../providers/app_providers.dart';
 import '../widgets/moroccan_pattern_background.dart';
 
@@ -94,6 +95,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
               maxLines: 6,
               decoration: const InputDecoration(labelText: 'Description'),
             ),
+            FormSpacing.betweenInputs,
             TextField(controller: _cat, decoration: const InputDecoration(labelText: 'Domaine / catégorie')),
             const SizedBox(height: 12),
             Row(

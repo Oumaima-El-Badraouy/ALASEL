@@ -1,5 +1,5 @@
 import * as db from '../db/index.js';
-import { emitNewMessage } from '../realtime.js';
+import { emitNewMessage, emitUserInboxPing } from '../realtime.js';
 
 function peerDisplay(peer) {
   if (!peer) return 'Utilisateur';
@@ -124,6 +124,13 @@ export async function postMessage(req, res) {
       createdAt,
     };
     emitNewMessage(req.params.id, payload);
+    if (receiverId) {
+      emitUserInboxPing(receiverId, {
+        type: 'new_message',
+        conversationId: req.params.id,
+        senderId: req.user.uid,
+      });
+    }
     return res.status(201).json({ id });
   } catch (e) {
     return res.status(500).json({ error: e.message });

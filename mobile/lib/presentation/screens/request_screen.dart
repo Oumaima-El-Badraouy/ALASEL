@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/form_spacing.dart';
 import '../providers/app_providers.dart';
 import '../widgets/moroccan_app_bar.dart';
 import '../widgets/moroccan_card.dart';
@@ -71,7 +72,7 @@ class _RequestScreenState extends ConsumerState<RequestScreen> {
               controller: _title,
               decoration: const InputDecoration(labelText: 'Titre'),
             ),
-            const SizedBox(height: 12),
+            FormSpacing.betweenInputs,
             DropdownButtonFormField<String>(
               value: category,
               decoration: const InputDecoration(labelText: 'Catégorie'),
@@ -85,18 +86,18 @@ class _RequestScreenState extends ConsumerState<RequestScreen> {
               ],
               onChanged: (v) => setState(() => category = v ?? 'plumbing'),
             ),
-            const SizedBox(height: 12),
+            FormSpacing.betweenInputs,
             TextField(
               controller: _desc,
               maxLines: 3,
               decoration: const InputDecoration(labelText: 'Description'),
             ),
-            const SizedBox(height: 12),
+            FormSpacing.betweenInputs,
             TextField(
               controller: _city,
               decoration: const InputDecoration(labelText: 'Ville'),
             ),
-            const SizedBox(height: 12),
+            FormSpacing.betweenInputs,
             Row(
               children: [
                 Expanded(

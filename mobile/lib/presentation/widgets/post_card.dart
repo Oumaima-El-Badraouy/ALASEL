@@ -9,6 +9,7 @@ import '../../core/auth/auth_notifier.dart';
 import '../../core/theme/app_colors.dart';
 import '../../data/models/post_model.dart';
 import '../providers/app_providers.dart';
+import 'author_avatar.dart';
 import 'moroccan_card.dart';
 import 'post_comments_sheet.dart';
 import 'post_likers_sheet.dart';
@@ -128,6 +129,7 @@ class _PostCardState extends ConsumerState<PostCard> {
     final me = ref.watch(authNotifierProvider).user;
     final isMine = me?.id == widget.post.userId;
     final canEngage = me != null && (me.role == 'client' || me.role == 'artisan');
+    final authorName = widget.post.authorDisplayName ?? (widget.post.isService ? 'Artisan' : 'Client');
 
     return MoroccanCard(
       onTap: null,
@@ -135,6 +137,26 @@ class _PostCardState extends ConsumerState<PostCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              AuthorAvatar(
+                radius: 20,
+                photoUrl: widget.post.authorPhotoUrl,
+                fallbackLabel: authorName,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  authorName,
+                  style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
           Row(
             children: [
               Container(

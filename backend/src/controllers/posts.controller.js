@@ -64,18 +64,20 @@ async function authorPopularity(authorId) {
 
 async function withAuthorDisplayName(p) {
   const uid = p.userId || p.authorId;
-  if (!uid) return { ...p, authorDisplayName: 'Artisan' };
+  if (!uid) return { ...p, authorDisplayName: 'Artisan', authorPhotoUrl: null };
   const u = await db.docGet('users', uid);
   const name =
     (u && (u.name || u.displayName)) ||
     (u && u.firstName && u.lastName ? `${u.firstName} ${u.lastName}`.trim() : null) ||
     'Artisan';
-  return { ...p, authorDisplayName: name };
+  const photo =
+    u && u.photoUrl != null && String(u.photoUrl).trim() ? String(u.photoUrl).trim() : null;
+  return { ...p, authorDisplayName: name, authorPhotoUrl: photo };
 }
 
 export async function listFeed(req, res) {
   try {
-    const { category, postType, type, sort } = req.query;
+    const { category, postType, type, sort, q } = req.query;
     let rows = (await db.queryAll('posts', 500)).filter((p) => !p.deleted);
 
     const tFilter = type || postType;
@@ -105,7 +107,22 @@ export async function listFeed(req, res) {
       rows.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
     }
 
-    const items = await Promise.all(rows.map((p) => withAuthorDisplayName(p)));
+    let items = await Promise.all(rows.map((p) => withAuthorDisplayName(p)));
+    const needle = q != null ? String(q).trim().toLowerCase() : '';
+    if (needle) {
+      items = items.filter((p) => {
+        const content = String(p.content || '').toLowerCase();
+        const cat = String(p.category || '').toLowerCase();
+        const auth = String(p.authorDisplayName || '').toLowerCase();
+        const city = String(p.city || '').toLowerCase();
+        return (
+          content.includes(needle) ||
+          cat.includes(needle) ||
+          auth.includes(needle) ||
+          city.includes(needle)
+        );
+      });
+    }
     const [allLikes, allComments] = await Promise.all([
       db.queryAll('post_likes', 5000),
       db.queryAll('post_comments', 5000),
@@ -122,7 +139,8 @@ export async function listMine(req, res) {
     const all = await db.queryAll('posts', 500);
     const mine = all.filter((p) => (p.userId || p.authorId) === req.user.uid && !p.deleted);
     mine.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
-    return res.json({ items: mine });
+    const items = await Promise.all(mine.map((p) => withAuthorDisplayName(p)));
+    return res.json({ items });
   } catch (e) {
     return res.status(500).json({ error: e.message });
   }

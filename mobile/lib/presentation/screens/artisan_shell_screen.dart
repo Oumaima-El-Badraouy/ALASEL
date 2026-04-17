@@ -21,6 +21,7 @@ class _ArtisanShellScreenState extends ConsumerState<ArtisanShellScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.sand,
       body: Column(
         children: [
           const ShellMessagesBar(),
@@ -46,7 +47,6 @@ class _ArtisanShellScreenState extends ConsumerState<ArtisanShellScreen> {
           NavigationDestination(icon: Icon(Icons.post_add_outlined), selectedIcon: Icon(Icons.post_add), label: 'Mes posts'),
           NavigationDestination(icon: Icon(Icons.person_outline), selectedIcon: Icon(Icons.person), label: 'Profil'),
         ],
-        indicatorColor: AppColors.gold.withValues(alpha: 0.35),
       ),
     );
   }

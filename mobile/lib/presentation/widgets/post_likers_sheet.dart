@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../providers/app_providers.dart';
+import 'author_avatar.dart';
 
 /// Liste des personnes qui ont aimé un post.
 class PostLikersSheet extends ConsumerStatefulWidget {
@@ -85,12 +86,10 @@ class _PostLikersSheetState extends ConsumerState<PostLikersSheet> {
                                 final role = m['role'] as String? ?? '';
                                 final label = role == 'artisan' ? 'Artisan' : (role == 'client' ? 'Client' : '');
                                 return ListTile(
-                                  leading: CircleAvatar(
-                                    backgroundColor: AppColors.deepBlue.withValues(alpha: 0.12),
-                                    child: Text(
-                                      _line(m).isNotEmpty ? _line(m)[0].toUpperCase() : '?',
-                                      style: const TextStyle(fontWeight: FontWeight.w800, color: AppColors.deepBlue),
-                                    ),
+                                  leading: AuthorAvatar(
+                                    radius: 22,
+                                    photoUrl: m['photoUrl'] as String?,
+                                    fallbackLabel: _line(m),
                                   ),
                                   title: Text(_line(m), style: const TextStyle(fontWeight: FontWeight.w600)),
                                   subtitle: label.isEmpty ? null : Text(label, style: const TextStyle(fontSize: 12)),

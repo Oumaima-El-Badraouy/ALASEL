@@ -12,6 +12,7 @@ class PostModel {
     this.authorId,
     this.postType,
     this.authorDisplayName,
+    this.authorPhotoUrl,
     this.likesCount = 0,
     this.commentsCount = 0,
     this.likedByMe = false,
@@ -29,6 +30,8 @@ class PostModel {
   final String? postType;
   /// Renseigné par l’API sur le feed (nom artisan).
   final String? authorDisplayName;
+  /// Photo de profil de l’auteur (`users.photoUrl`), renseignée par l’API.
+  final String? authorPhotoUrl;
   final int likesCount;
   final int commentsCount;
   final bool likedByMe;
@@ -54,6 +57,7 @@ class PostModel {
       authorId: j['authorId'] as String?,
       postType: j['postType'] as String?,
       authorDisplayName: j['authorDisplayName'] as String?,
+      authorPhotoUrl: j['authorPhotoUrl'] as String?,
       likesCount: (j['likesCount'] as num?)?.toInt() ?? 0,
       commentsCount: (j['commentsCount'] as num?)?.toInt() ?? 0,
       likedByMe: j['likedByMe'] as bool? ?? false,

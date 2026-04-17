@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../core/auth/auth_notifier.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/form_spacing.dart';
 import '../widgets/moroccan_pattern_background.dart';
 
 class AuthRegisterArtisanScreen extends ConsumerStatefulWidget {
@@ -114,7 +115,9 @@ class _AuthRegisterArtisanScreenState extends ConsumerState<AuthRegisterArtisanS
             ),
             const SizedBox(height: 16),
             TextField(controller: _name, decoration: const InputDecoration(labelText: 'Nom complet (obligatoire)')),
+            FormSpacing.betweenInputs,
             TextField(controller: _domain, decoration: const InputDecoration(labelText: 'Domaine (plombier, peintre…)')),
+            FormSpacing.betweenInputs,
             TextField(
               controller: _desc,
               maxLines: 4,
@@ -122,8 +125,11 @@ class _AuthRegisterArtisanScreenState extends ConsumerState<AuthRegisterArtisanS
                 labelText: 'Description du profil (obligatoire, min. 10 caractères)',
               ),
             ),
+            FormSpacing.betweenInputs,
             TextField(controller: _phone, keyboardType: TextInputType.phone, decoration: const InputDecoration(labelText: 'Téléphone (obligatoire)')),
+            FormSpacing.betweenInputs,
             TextField(controller: _email, decoration: const InputDecoration(labelText: 'Email')),
+            FormSpacing.betweenInputs,
             TextField(controller: _password, obscureText: true, decoration: const InputDecoration(labelText: 'Mot de passe (min 6)')),
             CheckboxListTile(
               value: mediouna,

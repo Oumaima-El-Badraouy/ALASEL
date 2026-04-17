@@ -42,7 +42,7 @@ class _ClientFeedScreenState extends ConsumerState<ClientFeedScreen> {
     final async = ref.watch(_clientFeedProvider(_providerKey));
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFA),
+      backgroundColor: AppColors.sand,
       body: RefreshIndicator(
         onRefresh: () async {
           ref.invalidate(_clientFeedProvider(_providerKey));
@@ -53,26 +53,35 @@ class _ClientFeedScreenState extends ConsumerState<ClientFeedScreen> {
             SliverAppBar(
               pinned: true,
               floating: false,
-              backgroundColor: AppColors.white,
+              backgroundColor: AppColors.parchment,
               surfaceTintColor: Colors.transparent,
-              elevation: 0.5,
+              elevation: 1,
+              shadowColor: AppColors.deepBlue.withValues(alpha: 0.08),
               title: Row(
                 children: [
                   Text(
                     'AL ASEL',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w800,
-                          letterSpacing: 0.5,
+                          letterSpacing: 0.8,
                           color: AppColors.deepBlue,
                         ),
                   ),
-                  const SizedBox(width: 6),
-                  Text(
-                    'Mediouna',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.terracotta.withValues(alpha: 0.9),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: AppColors.gold.withValues(alpha: 0.22),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: AppColors.gold.withValues(alpha: 0.45)),
+                    ),
+                    child: Text(
+                      'Mediouna',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.terracotta.withValues(alpha: 0.95),
+                      ),
                     ),
                   ),
                 ],

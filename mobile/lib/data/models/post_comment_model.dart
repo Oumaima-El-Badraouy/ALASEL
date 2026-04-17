@@ -8,6 +8,7 @@ class PostCommentModel {
     this.authorFirstName,
     this.authorLastName,
     this.authorRole,
+    this.authorPhotoUrl,
   });
 
   final String id;
@@ -19,6 +20,7 @@ class PostCommentModel {
   final String? authorLastName;
   /// `client` | `artisan`
   final String? authorRole;
+  final String? authorPhotoUrl;
 
   String get displayNameLine {
     final fn = (authorFirstName ?? '').trim();
@@ -39,6 +41,7 @@ class PostCommentModel {
       authorFirstName: j['authorFirstName'] as String?,
       authorLastName: j['authorLastName'] as String?,
       authorRole: j['authorRole'] as String?,
+      authorPhotoUrl: j['authorPhotoUrl'] as String?,
     );
   }
 }

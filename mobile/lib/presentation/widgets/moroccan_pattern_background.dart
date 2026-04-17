@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
 
-/// Fond style riad : dégradé sable + zellij (étoiles, losanges, filets or).
+/// Fond type riad : dégradé parchemin + zellige (étoiles, losanges, filets or).
 class MoroccanPatternBackground extends StatelessWidget {
   const MoroccanPatternBackground({super.key, required this.child});
 
@@ -21,12 +21,8 @@ class MoroccanPatternBackground extends StatelessWidget {
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [
-                  AppColors.sand,
-                  AppColors.sandDeep.withValues(alpha: 0.85),
-                  AppColors.sand,
-                ],
-                stops: const [0.0, 0.45, 1.0],
+                colors: AppColors.sandGradient,
+                stops: const [0.0, 0.5, 1.0],
               ),
             ),
           ),
@@ -54,8 +50,8 @@ class _ZellijFieldPainter extends CustomPainter {
   void _stars(Canvas canvas, Size size) {
     final p = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.1
-      ..color = AppColors.deepBlue.withValues(alpha: 0.09);
+      ..strokeWidth = 1.15
+      ..color = AppColors.deepBlue.withValues(alpha: 0.1);
 
     const step = 52.0;
     for (double y = -step; y < size.height + step; y += step) {
@@ -66,8 +62,8 @@ class _ZellijFieldPainter extends CustomPainter {
 
     final pSmall = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 0.7
-      ..color = AppColors.zellijGlaze.withValues(alpha: 0.07);
+      ..strokeWidth = 0.75
+      ..color = AppColors.zellijGlaze.withValues(alpha: 0.09);
     for (double y = -step / 2; y < size.height + step; y += step) {
       for (double x = -step / 2; x < size.width + step; x += step) {
         _star(canvas, Offset(x, y), 5.5, pSmall);
@@ -78,8 +74,8 @@ class _ZellijFieldPainter extends CustomPainter {
   void _diamondMesh(Canvas canvas, Size size) {
     final p = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 0.65
-      ..color = AppColors.gold.withValues(alpha: 0.07);
+      ..strokeWidth = 0.7
+      ..color = AppColors.gold.withValues(alpha: 0.1);
 
     const g = 36.0;
     for (double y = 0; y < size.height + g; y += g) {
@@ -102,7 +98,7 @@ class _ZellijFieldPainter extends CustomPainter {
   void _glazeDots(Canvas canvas, Size size) {
     final p = Paint()
       ..style = PaintingStyle.fill
-      ..color = AppColors.zellijGlaze.withValues(alpha: 0.06);
+      ..color = AppColors.zellijMint.withValues(alpha: 0.07);
     const step = 88.0;
     for (double y = 22; y < size.height; y += step) {
       for (double x = 44; x < size.width; x += step) {
@@ -114,8 +110,8 @@ class _ZellijFieldPainter extends CustomPainter {
   void _goldWeave(Canvas canvas, Size size) {
     final p = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 0.75
-      ..color = AppColors.gold.withValues(alpha: 0.06);
+      ..strokeWidth = 0.8
+      ..color = AppColors.gold.withValues(alpha: 0.08);
     for (double i = -size.height; i < size.width + size.height; i += 64) {
       canvas.drawLine(Offset(i, 0), Offset(i + size.height * 0.92, size.height), p);
     }

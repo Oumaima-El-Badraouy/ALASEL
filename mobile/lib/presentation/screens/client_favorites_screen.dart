@@ -22,7 +22,7 @@ class ClientFavoritesScreen extends ConsumerWidget {
     final async = ref.watch(_favoritesFeedProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFA),
+      backgroundColor: AppColors.sand,
       body: RefreshIndicator(
         onRefresh: () async {
           ref.invalidate(_favoritesFeedProvider);

@@ -7,6 +7,7 @@ function authorFields(u) {
       authorLastName: '',
       authorDisplayName: 'Utilisateur',
       authorRole: null,
+      authorPhotoUrl: null,
     };
   }
   const fn = String(u.firstName || '').trim();
@@ -18,11 +19,13 @@ function authorFields(u) {
   if (!display && (fn || ln)) display = `${fn} ${ln}`.trim();
   if (!display && u.email) display = String(u.email).split('@')[0];
   if (!display) display = 'Utilisateur';
+  const photo = u.photoUrl != null && String(u.photoUrl).trim() ? String(u.photoUrl).trim() : null;
   return {
     authorFirstName: fn,
     authorLastName: ln,
     authorDisplayName: display,
     authorRole: u.role || null,
+    authorPhotoUrl: photo,
   };
 }
 
@@ -138,6 +141,7 @@ export async function listPostLikes(req, res) {
           lastName: a.authorLastName,
           authorDisplayName: a.authorDisplayName,
           role: a.authorRole,
+          photoUrl: a.authorPhotoUrl,
           createdAt: l.createdAt,
         };
       })

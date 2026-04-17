@@ -6,9 +6,11 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/auth/auth_notifier.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/form_spacing.dart';
 import '../../data/models/post_model.dart';
 import '../../data/models/user_model.dart';
 import '../providers/app_providers.dart';
+import '../widgets/author_avatar.dart';
 
 final _myDemandsProvider = FutureProvider.autoDispose<List<PostModel>>((ref) async {
   final all = await ref.watch(marketplaceRepositoryProvider).myPosts();
@@ -48,7 +50,7 @@ class ClientProfileScreen extends ConsumerWidget {
     final followingAsync = ref.watch(_followingCountProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFA),
+      backgroundColor: AppColors.sand,
       body: u == null
           ? const Center(child: Text('Non connecté'))
           : CustomScrollView(
@@ -285,6 +287,7 @@ class ClientProfileScreen extends ConsumerWidget {
             const Text('Modifier', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18)),
             const SizedBox(height: 16),
             TextField(controller: first, decoration: const InputDecoration(labelText: 'Prénom')),
+            FormSpacing.betweenInputs,
             TextField(controller: last, decoration: const InputDecoration(labelText: 'Nom')),
             const SizedBox(height: 16),
             FilledButton(
@@ -322,6 +325,12 @@ class _DemandTile extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            AuthorAvatar(
+              radius: 22,
+              photoUrl: post.authorPhotoUrl,
+              fallbackLabel: post.authorDisplayName ?? 'Moi',
+            ),
+            const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

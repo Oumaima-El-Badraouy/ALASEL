@@ -11,6 +11,7 @@ import * as posts from '../controllers/posts.controller.js';
 import * as follows from '../controllers/follows.controller.js';
 import * as favorites from '../controllers/favorites.controller.js';
 import * as postEngagement from '../controllers/postEngagement.controller.js';
+import * as reports from '../controllers/reports.controller.js';
 
 const r = Router();
 
@@ -21,6 +22,8 @@ r.post('/auth/register', auth.register);
 r.post('/auth/login', auth.login);
 
 r.use(requireAuth);
+
+r.post('/reports', reports.createReport);
 
 r.post('/users/bootstrap', users.bootstrap);
 r.get('/users/me', users.getMe);

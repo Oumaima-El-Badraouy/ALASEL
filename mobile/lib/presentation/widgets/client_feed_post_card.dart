@@ -9,6 +9,7 @@ import '../../core/auth/auth_notifier.dart';
 import '../../core/theme/app_colors.dart';
 import '../../data/models/post_model.dart';
 import '../providers/app_providers.dart';
+import 'author_avatar.dart';
 import 'post_comments_sheet.dart';
 import 'post_likers_sheet.dart';
 
@@ -146,7 +147,6 @@ class _ClientFeedPostCardState extends ConsumerState<ClientFeedPostCard> {
     final isMine = me?.id == widget.post.userId;
     final isFav = me?.favoritePostIds.contains(widget.post.id) ?? false;
     final author = widget.post.authorDisplayName ?? 'Artisan';
-    final initial = author.isNotEmpty ? author[0].toUpperCase() : '?';
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -163,10 +163,10 @@ class _ClientFeedPostCardState extends ConsumerState<ClientFeedPostCard> {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                CircleAvatar(
+                AuthorAvatar(
                   radius: 18,
-                  backgroundColor: AppColors.deepBlue.withValues(alpha: 0.12),
-                  child: Text(initial, style: const TextStyle(color: AppColors.deepBlue, fontWeight: FontWeight.w800)),
+                  photoUrl: widget.post.authorPhotoUrl,
+                  fallbackLabel: author,
                 ),
                 const SizedBox(width: 10),
                 Expanded(

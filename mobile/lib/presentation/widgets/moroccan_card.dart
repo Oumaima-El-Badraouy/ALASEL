@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
 
-/// Carte avec coins zellij (étoiles) visibles au-dessus du fond — filet or.
+/// Carte style « cadre zellige » : filet or, ombre douce, étoiles aux coins.
 class MoroccanCard extends StatelessWidget {
   const MoroccanCard({
     super.key,
@@ -26,12 +26,17 @@ class MoroccanCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.white,
           borderRadius: BorderRadius.circular(22),
-          border: Border.all(color: AppColors.gold.withValues(alpha: 0.45), width: 1.2),
+          border: Border.all(color: AppColors.gold.withValues(alpha: 0.55), width: 1.4),
           boxShadow: [
             BoxShadow(
-              color: AppColors.deepBlue.withValues(alpha: 0.07),
-              blurRadius: 18,
-              offset: const Offset(0, 8),
+              color: AppColors.deepBlue.withValues(alpha: 0.08),
+              blurRadius: 22,
+              offset: const Offset(0, 10),
+            ),
+            BoxShadow(
+              color: AppColors.terracotta.withValues(alpha: 0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
@@ -61,13 +66,13 @@ class _ZellijCornerPainter extends CustomPainter {
     const r = 14.0;
     final paint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.2
-      ..color = AppColors.deepBlue.withValues(alpha: 0.4);
+      ..strokeWidth = 1.25
+      ..color = AppColors.deepBlue.withValues(alpha: 0.38);
 
     final gold = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 0.9
-      ..color = AppColors.gold.withValues(alpha: 0.65);
+      ..strokeWidth = 1.0
+      ..color = AppColors.gold.withValues(alpha: 0.72);
 
     void star(Offset c) {
       _drawStar(canvas, c, r, paint);

@@ -6,6 +6,7 @@ import '../../core/auth/auth_notifier.dart';
 import '../../core/theme/app_colors.dart';
 import '../../data/models/post_comment_model.dart';
 import '../providers/app_providers.dart';
+import 'author_avatar.dart';
 
 /// Feuille modale : commentaires (prénom + nom) + chat / suivre par ligne.
 class PostCommentsSheet extends ConsumerStatefulWidget {
@@ -157,7 +158,6 @@ class _PostCommentsSheetState extends ConsumerState<PostCommentsSheet> {
                               separatorBuilder: (_, __) => const SizedBox(height: 4),
                               itemBuilder: (_, i) {
                                 final c = _items[i];
-                                final initial = c.displayNameLine.isNotEmpty ? c.displayNameLine[0].toUpperCase() : '?';
                                 final roleLabel = c.authorRole == 'artisan'
                                     ? 'Artisan'
                                     : (c.authorRole == 'client' ? 'Client' : '');
@@ -166,13 +166,10 @@ class _PostCommentsSheetState extends ConsumerState<PostCommentsSheet> {
                                   child: Row(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      CircleAvatar(
+                                      AuthorAvatar(
                                         radius: 18,
-                                        backgroundColor: AppColors.terracotta.withValues(alpha: 0.2),
-                                        child: Text(
-                                          initial,
-                                          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
-                                        ),
+                                        photoUrl: c.authorPhotoUrl,
+                                        fallbackLabel: c.displayNameLine,
                                       ),
                                       const SizedBox(width: 10),
                                       Expanded(

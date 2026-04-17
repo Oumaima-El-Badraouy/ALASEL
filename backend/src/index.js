@@ -32,6 +32,11 @@ app.use(express.json({ limit: '15mb' }));
 app.use('/api/v1', v1);
 
 io.on('connection', (socket) => {
+  socket.on('join_user', (userId) => {
+    if (typeof userId === 'string' && userId.length > 0) {
+      socket.join(`user:${userId}`);
+    }
+  });
   socket.on('join_conversation', (conversationId) => {
     if (typeof conversationId === 'string') {
       socket.join(`conv:${conversationId}`);
@@ -45,11 +50,16 @@ io.on('connection', (socket) => {
 });
 
 const PORT = Number(process.env.PORT) || 4000;
-server.listen(PORT, async () => {
-  loadMemorySnapshot();
-  await seedDemoIfEnabled();
-  console.log(`AL ASEL API listening on :${PORT} (memory=${process.env.MEMORY_STORE === '1'})`);
-});
+
+if (process.env.NODE_ENV !== "production") {
+  server.listen(PORT, async () => {
+    loadMemorySnapshot();
+    await seedDemoIfEnabled();
+    console.log(`AL ASEL API listening on :${PORT} (memory=${process.env.MEMORY_STORE === '1'})`);
+  });
+}
+
+export default server;
 
 function exitAfterFlush(code) {
   flushMemorySnapshotSync();
