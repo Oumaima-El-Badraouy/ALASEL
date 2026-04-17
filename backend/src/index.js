@@ -8,6 +8,7 @@ import v1 from './routes/v1.routes.js';
 import { initFirebase } from './config/firebase.js';
 import { setIo } from './realtime.js';
 import { seedDemoIfEnabled } from './seed/demoSeed.js';
+import { loadMemorySnapshot, flushMemorySnapshotSync } from './db/index.js';
 
 if (process.env.MEMORY_STORE !== '1') {
   try {
@@ -26,7 +27,7 @@ setIo(io);
 
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(cors({ origin: true, credentials: true }));
-app.use(express.json({ limit: '2mb' }));
+app.use(express.json({ limit: '15mb' }));
 
 app.use('/api/v1', v1);
 
@@ -45,6 +46,14 @@ io.on('connection', (socket) => {
 
 const PORT = Number(process.env.PORT) || 4000;
 server.listen(PORT, async () => {
+  loadMemorySnapshot();
   await seedDemoIfEnabled();
   console.log(`AL ASEL API listening on :${PORT} (memory=${process.env.MEMORY_STORE === '1'})`);
 });
+
+function exitAfterFlush(code) {
+  flushMemorySnapshotSync();
+  process.exit(code);
+}
+process.on('SIGINT', () => exitAfterFlush(0));
+process.on('SIGTERM', () => exitAfterFlush(0));

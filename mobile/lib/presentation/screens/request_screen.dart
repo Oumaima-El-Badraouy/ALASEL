@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../providers/app_providers.dart';
+import '../widgets/moroccan_app_bar.dart';
+import '../widgets/moroccan_card.dart';
 import '../widgets/moroccan_pattern_background.dart';
 
 class RequestScreen extends ConsumerStatefulWidget {
@@ -52,7 +54,15 @@ class _RequestScreenState extends ConsumerState<RequestScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Nouvelle demande')),
+      appBar: MoroccanAppBar(
+        title: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('طلب جديد', style: Theme.of(context).textTheme.labelLarge?.copyWith(color: AppColors.zellijGlaze)),
+            const Text('Nouvelle demande'),
+          ],
+        ),
+      ),
       body: MoroccanPatternBackground(
         child: ListView(
           padding: const EdgeInsets.all(16),
@@ -118,20 +128,18 @@ class _RequestScreenState extends ConsumerState<RequestScreen> {
             ),
             if (estimate != null) ...[
               const SizedBox(height: 12),
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(14),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '${estimate!['min']} – ${estimate!['max']} ${estimate!['currency']}',
-                        style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 18, color: AppColors.deepBlue),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(estimate!['disclaimer'] as String? ?? '', style: const TextStyle(color: AppColors.muted, fontSize: 12)),
-                    ],
-                  ),
+              MoroccanCard(
+                padding: const EdgeInsets.all(14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${estimate!['min']} – ${estimate!['max']} ${estimate!['currency']}',
+                      style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 18, color: AppColors.deepBlue),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(estimate!['disclaimer'] as String? ?? '', style: const TextStyle(color: AppColors.muted, fontSize: 12)),
+                  ],
                 ),
               ),
             ],

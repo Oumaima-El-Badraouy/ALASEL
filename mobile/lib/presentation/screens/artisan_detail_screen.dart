@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_colors.dart';
 import '../../data/models/artisan_model.dart';
 import '../providers/app_providers.dart';
+import '../widgets/moroccan_app_bar.dart';
 import '../widgets/moroccan_pattern_background.dart';
 
 final _artisanProvider = FutureProvider.autoDispose.family<ArtisanModel, String>((ref, id) async {
@@ -22,7 +23,15 @@ class ArtisanDetailScreen extends ConsumerWidget {
     final async = ref.watch(_artisanProvider(artisanId));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Profil artisan')),
+      appBar: MoroccanAppBar(
+        title: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('حرفي', style: Theme.of(context).textTheme.labelLarge?.copyWith(color: AppColors.zellijGlaze)),
+            const Text('Profil artisan'),
+          ],
+        ),
+      ),
       body: MoroccanPatternBackground(
         child: async.when(
           data: (a) => ListView(

@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../../core/theme/app_colors.dart';
 import '../../data/models/artisan_model.dart';
 import '../providers/app_providers.dart';
+import '../widgets/moroccan_app_bar.dart';
+import '../widgets/moroccan_card.dart';
 import '../widgets/moroccan_pattern_background.dart';
 
 class ExploreScreen extends ConsumerStatefulWidget {
@@ -38,7 +40,15 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
     final async = ref.watch(artisanListProvider(filters));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Explorer')),
+      appBar: MoroccanAppBar(
+        title: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('استكشف', style: Theme.of(context).textTheme.labelLarge?.copyWith(color: AppColors.zellijGlaze)),
+            const Text('Explorer'),
+          ],
+        ),
+      ),
       body: MoroccanPatternBackground(
         child: Column(
           children: [
@@ -112,10 +122,11 @@ class _ArtisanTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    return MoroccanCard(
+      onTap: onTap,
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       child: ListTile(
-        onTap: onTap,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         title: Text(artisan.displayName, style: const TextStyle(fontWeight: FontWeight.w700)),
         subtitle: Text(
           '${artisan.categories.join(", ")} · ${artisan.serviceAreas.join(", ")}',
@@ -126,7 +137,7 @@ class _ArtisanTile extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text('${artisan.trustScore}', style: const TextStyle(fontWeight: FontWeight.w800, color: AppColors.deepBlue)),
-            const Text('Trust', style: TextStyle(fontSize: 10, color: AppColors.muted)),
+            const Text('ثقة', style: TextStyle(fontSize: 10, color: AppColors.muted)),
           ],
         ),
       ),

@@ -1,7 +1,22 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" fill="none">
-  <rect width="256" height="256" rx="52" fill="#F4EDE4"/>
-  <path d="M128 44L184 80V128L128 164L72 128V80L128 44Z" stroke="#1C3D5A" stroke-width="7" fill="none"/>
-  <path d="M128 72L156 92V124L128 144L100 124V92L128 72Z" fill="#C9A227"/>
+  <defs>
+    <linearGradient id="sand" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#F4EDE4"/>
+      <stop offset="100%" stop-color="#E8DED4"/>
+    </linearGradient>
+  </defs>
+  <rect width="256" height="256" rx="56" fill="url(#sand)"/>
+  <!-- Outer zellij frame -->
+  <path d="M128 32L200 76V148L128 192L56 148V76L128 32Z" stroke="#1C3D5A" stroke-width="6" fill="none"/>
+  <path d="M128 48L184 84V140L128 176L72 140V84L128 48Z" stroke="#C9A227" stroke-width="2" fill="none" opacity="0.85"/>
+  <!-- Inner star (zellij) -->
+  <path d="M128 68L162 90V134L128 156L94 134V90L128 68Z" fill="#2A5F6F" opacity="0.25"/>
+  <path d="M128 76L152 92V128L128 144L104 128V92L128 76Z" fill="#C9A227"/>
   <path d="M128 96L140 104V120L128 128L116 120V104L128 96Z" fill="#C56A3D"/>
-  <circle cx="128" cy="116" r="8" fill="#1C3D5A" opacity="0.35"/>
+  <circle cx="128" cy="112" r="9" fill="#1C3D5A" opacity="0.4"/>
+  <!-- Corner rosettes -->
+  <circle cx="72" cy="84" r="4" fill="#C9A227" opacity="0.7"/>
+  <circle cx="184" cy="84" r="4" fill="#C9A227" opacity="0.7"/>
+  <circle cx="72" cy="140" r="4" fill="#C9A227" opacity="0.7"/>
+  <circle cx="184" cy="140" r="4" fill="#C9A227" opacity="0.7"/>
 </svg>

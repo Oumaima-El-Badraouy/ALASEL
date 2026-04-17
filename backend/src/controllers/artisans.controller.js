@@ -64,7 +64,7 @@ export async function upsertProfile(req, res) {
     const body = req.body || {};
     const profile = {
       userId: req.user.uid,
-      displayName: body.displayName || u.displayName,
+      displayName: body.displayName || u.name || u.displayName,
       bio: body.bio || '',
       categories: Array.isArray(body.categories) ? body.categories : [],
       serviceAreas: Array.isArray(body.serviceAreas) ? body.serviceAreas : [],

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
 
-/// Carte avec coins inspirés zellij (étoiles à 8 branches) et filet or / bleu.
+/// Carte avec coins zellij (étoiles) visibles au-dessus du fond — filet or.
 class MoroccanCard extends StatelessWidget {
   const MoroccanCard({
     super.key,
@@ -19,32 +19,38 @@ class MoroccanCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(22),
-        child: CustomPaint(
-          painter: _ZellijCornerPainter(),
-          child: Container(
-            padding: padding,
-            margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: AppColors.white,
-              borderRadius: BorderRadius.circular(22),
-              border: Border.all(color: AppColors.gold.withValues(alpha: 0.45), width: 1.2),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.deepBlue.withValues(alpha: 0.07),
-                  blurRadius: 18,
-                  offset: const Offset(0, 8),
-                ),
-              ],
+    final inner = CustomPaint(
+      foregroundPainter: _ZellijCornerPainter(),
+      child: Container(
+        padding: padding,
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(color: AppColors.gold.withValues(alpha: 0.45), width: 1.2),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.deepBlue.withValues(alpha: 0.07),
+              blurRadius: 18,
+              offset: const Offset(0, 8),
             ),
-            child: child,
-          ),
+          ],
         ),
+        child: child,
       ),
+    );
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+      child: onTap == null
+          ? inner
+          : Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: onTap,
+                borderRadius: BorderRadius.circular(22),
+                child: inner,
+              ),
+            ),
     );
   }
 }
@@ -56,22 +62,22 @@ class _ZellijCornerPainter extends CustomPainter {
     final paint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.2
-      ..color = AppColors.deepBlue.withValues(alpha: 0.35);
+      ..color = AppColors.deepBlue.withValues(alpha: 0.4);
 
     final gold = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 0.9
-      ..color = AppColors.gold.withValues(alpha: 0.6);
+      ..color = AppColors.gold.withValues(alpha: 0.65);
 
     void star(Offset c) {
       _drawStar(canvas, c, r, paint);
       _drawStar(canvas, c, r * 0.45, gold);
     }
 
-    star(const Offset(0, 0));
-    star(Offset(size.width, 0));
-    star(Offset(0, size.height));
-    star(Offset(size.width, size.height));
+    star(Offset(r * 0.35, r * 0.35));
+    star(Offset(size.width - r * 0.35, r * 0.35));
+    star(Offset(r * 0.35, size.height - r * 0.35));
+    star(Offset(size.width - r * 0.35, size.height - r * 0.35));
   }
 
   void _drawStar(Canvas canvas, Offset c, double radius, Paint paint) {
