@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/l10n/strings.dart';
 import '../../core/theme/app_colors.dart';
 import '../../data/models/artisan_model.dart';
 import '../providers/app_providers.dart';
@@ -41,12 +42,9 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
 
     return Scaffold(
       appBar: MoroccanAppBar(
-        title: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('استكشف', style: Theme.of(context).textTheme.labelLarge?.copyWith(color: AppColors.zellijGlaze)),
-            const Text('Explorer'),
-          ],
+        title: Text(
+          S.exploreSubtitle,
+          style: Theme.of(context).textTheme.labelLarge?.copyWith(color: AppColors.zellijGlaze),
         ),
       ),
       body: MoroccanPatternBackground(
@@ -60,7 +58,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                 children: [
                   for (final c in categories)
                     FilterChip(
-                      label: Text(c),
+                      label: Text(S.categoryLabel(c)),
                       selected: category == c,
                       onSelected: (v) => setState(() => category = v ? c : null),
                     ),
@@ -70,12 +68,12 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
             Padding(
               padding: const EdgeInsets.all(16),
               child: TextField(
-                decoration: const InputDecoration(hintText: 'Ville (ex: Casablanca)'),
+                decoration: const InputDecoration(hintText: S.cityHint),
                 onChanged: (v) => setState(() => city = v.trim()),
               ),
             ),
             SwitchListTile(
-              title: const Text('Disponible seulement'),
+              title: const Text(S.availableOnly),
               value: onlyAvail,
               onChanged: (v) => setState(() => onlyAvail = v),
             ),
@@ -86,7 +84,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                   if (items.isEmpty) {
                     return Center(
                       child: Text(
-                        'Aucun artisan — lancez l’API en mode MEMORY_STORE et créez un profil démo.',
+                        S.noArtisansHint,
                         textAlign: TextAlign.center,
                         style: TextStyle(color: AppColors.muted),
                       ),
@@ -104,7 +102,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                   );
                 },
                 loading: () => const Center(child: CircularProgressIndicator()),
-                error: (e, _) => Center(child: Text('Erreur: $e')),
+                error: (e, _) => Center(child: Text('${S.errorPrefix}$e')),
               ),
             ),
           ],

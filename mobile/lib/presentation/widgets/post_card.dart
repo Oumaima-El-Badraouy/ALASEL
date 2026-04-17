@@ -1,16 +1,15 @@
-import 'dart:convert';
-
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/auth/auth_notifier.dart';
+import '../../core/l10n/strings.dart';
 import '../../core/theme/app_colors.dart';
 import '../../data/models/post_model.dart';
 import '../providers/app_providers.dart';
 import 'author_avatar.dart';
 import 'moroccan_card.dart';
+import 'post_media_preview.dart';
 import 'post_comments_sheet.dart';
 import 'post_likers_sheet.dart';
 
@@ -60,15 +59,6 @@ class _PostCardState extends ConsumerState<PostCard> {
     _liked = widget.post.likedByMe;
   }
 
-  bool _isNetworkImage(String? m) {
-    if (m == null || m.isEmpty) return false;
-    return m.startsWith('http://') || m.startsWith('https://');
-  }
-
-  bool _isDataImage(String? m) {
-    return m != null && m.startsWith('data:image');
-  }
-
   Future<void> _toggleLike() async {
     final me = ref.read(authNotifierProvider).user;
     if (me == null || (me.role != 'client' && me.role != 'artisan') || _likeBusy) return;
@@ -94,7 +84,7 @@ class _PostCardState extends ConsumerState<PostCard> {
     final me = ref.read(authNotifierProvider).user;
     if (me == null || (me.role != 'client' && me.role != 'artisan')) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Connectez-vous en tant que client ou artisan pour commenter.')),
+        const SnackBar(content: Text(S.loginToComment)),
       );
       return;
     }
@@ -111,6 +101,9 @@ class _PostCardState extends ConsumerState<PostCard> {
           }
         },
         onEngagementChanged: widget.onEngagementChanged,
+        onFollowToggled: (artisanId) {
+          ref.invalidate(artisanFollowStatusProvider(artisanId));
+        },
       ),
     );
   }
@@ -129,7 +122,7 @@ class _PostCardState extends ConsumerState<PostCard> {
     final me = ref.watch(authNotifierProvider).user;
     final isMine = me?.id == widget.post.userId;
     final canEngage = me != null && (me.role == 'client' || me.role == 'artisan');
-    final authorName = widget.post.authorDisplayName ?? (widget.post.isService ? 'Artisan' : 'Client');
+    final authorName = widget.post.authorDisplayName ?? (widget.post.isService ? S.fallbackArtisan : S.fallbackClient);
 
     return MoroccanCard(
       onTap: null,
@@ -168,7 +161,7 @@ class _PostCardState extends ConsumerState<PostCard> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  widget.post.isService ? 'Service' : 'Demande',
+                  widget.post.isService ? S.postTypeService : S.postTypeDemand,
                   style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
                 ),
               ),
@@ -181,20 +174,7 @@ class _PostCardState extends ConsumerState<PostCard> {
             const SizedBox(height: 10),
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
-              child: AspectRatio(
-                aspectRatio: 4 / 3,
-                child: _isNetworkImage(widget.post.media)
-                    ? CachedNetworkImage(imageUrl: widget.post.media!, fit: BoxFit.cover)
-                    : _isDataImage(widget.post.media)
-                        ? Image.memory(
-                            base64Decode(widget.post.media!.split(',').last),
-                            fit: BoxFit.cover,
-                          )
-                        : const ColoredBox(
-                            color: AppColors.sandDeep,
-                            child: Center(child: Icon(Icons.image_not_supported_outlined)),
-                          ),
-              ),
+              child: PostMediaPreview(media: widget.post.media!, aspectRatio: 4 / 3),
             ),
           ],
           const SizedBox(height: 10),
@@ -270,13 +250,13 @@ class _PostCardState extends ConsumerState<PostCard> {
                     context.push(loc);
                   },
                   icon: const Icon(Icons.send_rounded, size: 18),
-                  label: const Text('Message'),
+                  label: const Text(S.messageButton),
                 ),
               if (widget.showFollow && widget.post.isService && !isMine) ...[
                 const SizedBox(width: 8),
                 FilledButton.tonal(
                   onPressed: widget.onFollowToggle,
-                  child: Text(widget.isFollowing ? 'Abonné' : 'Suivre'),
+                  child: Text(widget.isFollowing ? S.following : S.followButton),
                 ),
               ],
             ],

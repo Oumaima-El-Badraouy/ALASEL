@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/auth/auth_notifier.dart';
+import '../../core/l10n/strings.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/form_spacing.dart';
 import '../widgets/moroccan_card.dart';
@@ -36,9 +37,7 @@ class _AuthLoginScreenState extends ConsumerState<AuthLoginScreen> {
         s.contains('SocketException') ||
         s.contains('connection error') ||
         s.contains('Failed host lookup')) {
-      return 'Impossible de joindre l’API (port 4000). Vérifiez qu’elle tourne sur la machine hôte '
-          'et écoute sur toutes les interfaces (0.0.0.0). Sur un téléphone Android réel, '
-          'utilisez l’IP locale du PC avec --dart-define=API_BASE=…';
+      return S.errApiUnreachable;
     }
     return s;
   }
@@ -72,7 +71,7 @@ class _AuthLoginScreenState extends ConsumerState<AuthLoginScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: Text(
-          'Connexion',
+          S.loginTitle,
           style: GoogleFonts.elMessiri(fontWeight: FontWeight.w700, fontSize: 20),
         ),
       ),
@@ -94,7 +93,7 @@ class _AuthLoginScreenState extends ConsumerState<AuthLoginScreen> {
                 const MoroccanGoldBand(width: 100),
                 const SizedBox(height: 20),
                 Text(
-                  'Bienvenue',
+                  S.welcomeLogin,
                   textAlign: TextAlign.center,
                   style: GoogleFonts.elMessiri(
                     fontSize: 26,
@@ -104,7 +103,7 @@ class _AuthLoginScreenState extends ConsumerState<AuthLoginScreen> {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'Entrez vos identifiants pour accéder à votre espace',
+                  S.loginSubtitle,
                   textAlign: TextAlign.center,
                   style: GoogleFonts.cairo(
                     fontSize: 14,
@@ -121,18 +120,18 @@ class _AuthLoginScreenState extends ConsumerState<AuthLoginScreen> {
                       TextField(
                         controller: _email,
                         keyboardType: TextInputType.emailAddress,
-                        decoration: const InputDecoration(
-                          labelText: 'Email',
-                          prefixIcon: Icon(Icons.mail_outline_rounded),
+                        decoration: InputDecoration(
+                          labelText: S.emailLabel,
+                          prefixIcon: const Icon(Icons.mail_outline_rounded),
                         ),
                       ),
                       FormSpacing.betweenInputs,
                       TextField(
                         controller: _password,
                         obscureText: true,
-                        decoration: const InputDecoration(
-                          labelText: 'Mot de passe',
-                          prefixIcon: Icon(Icons.lock_outline_rounded),
+                        decoration: InputDecoration(
+                          labelText: S.passwordLabel,
+                          prefixIcon: const Icon(Icons.lock_outline_rounded),
                         ),
                       ),
                       if (err != null) ...[
@@ -148,7 +147,7 @@ class _AuthLoginScreenState extends ConsumerState<AuthLoginScreen> {
                                 width: 22,
                                 child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.white),
                               )
-                            : Text('Se connecter', style: GoogleFonts.cairo(fontWeight: FontWeight.w800)),
+                            : Text(S.loginButton, style: GoogleFonts.cairo(fontWeight: FontWeight.w800)),
                       ),
                     ],
                   ),
@@ -156,11 +155,11 @@ class _AuthLoginScreenState extends ConsumerState<AuthLoginScreen> {
                 const SizedBox(height: 8),
                 TextButton(
                   onPressed: () => context.push('/auth/register/client'),
-                  child: Text('Créer un compte client', style: GoogleFonts.cairo(fontWeight: FontWeight.w700)),
+                  child: Text(S.registerClient, style: GoogleFonts.cairo(fontWeight: FontWeight.w700)),
                 ),
                 TextButton(
                   onPressed: () => context.push('/auth/register/artisan'),
-                  child: Text('Créer un compte artisan', style: GoogleFonts.cairo(fontWeight: FontWeight.w700)),
+                  child: Text(S.registerArtisan, style: GoogleFonts.cairo(fontWeight: FontWeight.w700)),
                 ),
               ],
             ),

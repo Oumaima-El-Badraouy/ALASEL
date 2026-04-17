@@ -5,10 +5,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../core/l10n/strings.dart';
 import '../../core/theme/app_colors.dart';
 import '../providers/app_providers.dart';
 
-/// En-tête : logo + titre discret + messages (badge).
+/// شريط علوي : شعار + مديونة + إبلاغ + رسائل.
 class ShellMessagesBar extends ConsumerStatefulWidget {
   const ShellMessagesBar({super.key});
 
@@ -57,37 +58,32 @@ class _ShellMessagesBarState extends ConsumerState<ShellMessagesBar> {
         child: SafeArea(
           bottom: false,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
             child: Row(
               children: [
-                Image.asset(
-                  'assets/branding/logo_al_asel.png',
-                  height: 40,
-                  fit: BoxFit.contain,
-                  errorBuilder: (_, __, ___) => const SizedBox(height: 40, width: 40),
+                IconButton(
+                  tooltip: S.reportProblem,
+                  onPressed: () => context.push('/report'),
+                  icon: const Icon(Icons.flag_outlined, color: AppColors.deepBlue),
                 ),
-                const SizedBox(width: 10),
                 Expanded(
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        'AL ASEL',
-                        style: GoogleFonts.elMessiri(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.deepBlue,
-                          height: 1,
-                        ),
+                      Image.asset(
+                        'assets/branding/logo_al_asel.png',
+                        height: 52,
+                        fit: BoxFit.contain,
+                        errorBuilder: (_, __, ___) => const SizedBox(height: 52, width: 52),
                       ),
+                      const SizedBox(height: 2),
                       Text(
-                        'Mediouna',
+                        S.mediouna,
                         style: GoogleFonts.cairo(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w800,
                           color: AppColors.terracotta.withValues(alpha: 0.95),
-                          letterSpacing: 0.3,
+                          letterSpacing: 0.5,
                         ),
                       ),
                     ],
@@ -103,19 +99,19 @@ class _ShellMessagesBarState extends ConsumerState<ShellMessagesBar> {
                       color: AppColors.deepBlue.withValues(alpha: 0.08),
                       shape: const CircleBorder(),
                       child: IconButton(
-                        tooltip: 'Messages',
+                        tooltip: S.messages,
                         onPressed: () => context.push('/inbox'),
                         icon: const Icon(Icons.mark_chat_unread_outlined, color: AppColors.deepBlue),
                       ),
                     ),
                   ),
                   loading: () => IconButton(
-                    tooltip: 'Messages',
+                    tooltip: S.messages,
                     onPressed: () => context.push('/inbox'),
                     icon: const Icon(Icons.mark_chat_unread_outlined, color: AppColors.deepBlue),
                   ),
                   error: (_, __) => IconButton(
-                    tooltip: 'Messages',
+                    tooltip: S.messages,
                     onPressed: () => context.push('/inbox'),
                     icon: const Icon(Icons.mark_chat_unread_outlined, color: AppColors.deepBlue),
                   ),

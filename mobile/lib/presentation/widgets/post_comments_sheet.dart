@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/auth/auth_notifier.dart';
+import '../../core/l10n/strings.dart';
 import '../../core/theme/app_colors.dart';
 import '../../data/models/post_comment_model.dart';
 import '../providers/app_providers.dart';
@@ -15,11 +16,14 @@ class PostCommentsSheet extends ConsumerStatefulWidget {
     required this.postId,
     this.onCommentAdded,
     this.onEngagementChanged,
+    this.onFollowToggled,
   });
 
   final String postId;
   final VoidCallback? onCommentAdded;
   final VoidCallback? onEngagementChanged;
+  /// Après suivre / ne plus suivre un artisan depuis les commentaires.
+  final void Function(String artisanId)? onFollowToggled;
 
   @override
   ConsumerState<PostCommentsSheet> createState() => _PostCommentsSheetState();
@@ -104,14 +108,15 @@ class _PostCommentsSheetState extends ConsumerState<PostCommentsSheet> {
       if (following) {
         await repo.unfollowArtisan(c.userId);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Abonnement retiré')));
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text(S.unfollowedSnack)));
         }
       } else {
         await repo.followArtisan(c.userId);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Vous suivez cet artisan')));
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text(S.followingSnack)));
         }
       }
+      widget.onFollowToggled?.call(c.userId);
       widget.onEngagementChanged?.call();
     } catch (e) {
       if (mounted) {
@@ -136,7 +141,7 @@ class _PostCommentsSheetState extends ConsumerState<PostCommentsSheet> {
               padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
               child: Row(
                 children: [
-                  const Text('Commentaires', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18)),
+                  const Text(S.commentsTitle, style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18)),
                   const Spacer(),
                   IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close)),
                 ],
@@ -150,7 +155,7 @@ class _PostCommentsSheetState extends ConsumerState<PostCommentsSheet> {
                       ? Center(child: Text(_err!, style: const TextStyle(color: AppColors.muted)))
                       : _items.isEmpty
                           ? const Center(
-                              child: Text('Aucun commentaire. Soyez le premier.', style: TextStyle(color: AppColors.muted)),
+                              child: Text(S.noCommentsYet, style: TextStyle(color: AppColors.muted)),
                             )
                           : ListView.separated(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
@@ -159,8 +164,8 @@ class _PostCommentsSheetState extends ConsumerState<PostCommentsSheet> {
                               itemBuilder: (_, i) {
                                 final c = _items[i];
                                 final roleLabel = c.authorRole == 'artisan'
-                                    ? 'Artisan'
-                                    : (c.authorRole == 'client' ? 'Client' : '');
+                                    ? S.roleArtisanShort
+                                    : (c.authorRole == 'client' ? S.roleClientShort : '');
                                 return Padding(
                                   padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
                                   child: Row(
@@ -204,7 +209,7 @@ class _PostCommentsSheetState extends ConsumerState<PostCommentsSheet> {
                                                     OutlinedButton.icon(
                                                       onPressed: () => _openChat(c),
                                                       icon: const Icon(Icons.send_rounded, size: 16),
-                                                      label: const Text('Message'),
+                                                      label: const Text(S.messageButton),
                                                       style: OutlinedButton.styleFrom(
                                                         visualDensity: VisualDensity.compact,
                                                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -217,7 +222,7 @@ class _PostCommentsSheetState extends ConsumerState<PostCommentsSheet> {
                                                         visualDensity: VisualDensity.compact,
                                                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                                       ),
-                                                      child: const Text('Suivre'),
+                                                      child: const Text(S.followButton),
                                                     ),
                                                 ],
                                               ),
@@ -242,9 +247,9 @@ class _PostCommentsSheetState extends ConsumerState<PostCommentsSheet> {
                         controller: _text,
                         minLines: 1,
                         maxLines: 4,
-                        decoration: const InputDecoration(
-                          hintText: 'Ajouter un commentaire…',
-                          border: OutlineInputBorder(),
+                        decoration: InputDecoration(
+                          hintText: S.addCommentHint,
+                          border: const OutlineInputBorder(),
                           isDense: true,
                         ),
                         onSubmitted: (_) => _send(),

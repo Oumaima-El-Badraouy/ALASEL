@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 
 import '../models/artisan_model.dart';
@@ -20,15 +22,35 @@ class MarketplaceRepository {
     await _dio.patch('/users/me', data: data);
   }
 
+  Future<void> submitReport({required String text, String? category}) async {
+    await _dio.post('/reports', data: {
+      'text': text,
+      if (category != null && category.trim().isNotEmpty) 'category': category.trim(),
+    });
+  }
+
+  /// En démo (MEMORY_STORE) l’API peut renvoyer `demoCode` pour saisir le code à l’écran.
+  Future<String?> requestEmailVerificationCode() async {
+    final res = await _dio.post('/users/me/email/request-code');
+    final m = res.data as Map<String, dynamic>?;
+    return m?['demoCode'] as String?;
+  }
+
+  Future<void> verifyEmailCode(String code) async {
+    await _dio.post('/users/me/email/verify', data: {'code': code.trim()});
+  }
+
   Future<List<PostModel>> postsFeed({
     String? category,
     String postType = 'all',
     String? sort,
+    String? q,
   }) async {
     final res = await _dio.get('/posts/feed', queryParameters: {
       if (category != null && category.isNotEmpty) 'category': category,
       'postType': postType,
       if (sort != null && sort.isNotEmpty) 'sort': sort,
+      if (q != null && q.trim().isNotEmpty) 'q': q.trim(),
     });
     final list = (res.data['items'] as List<dynamic>? ?? [])
         .map((e) => PostModel.fromJson(e as Map<String, dynamic>))
@@ -59,6 +81,26 @@ class MarketplaceRepository {
       'phone': m['phone'] as String? ?? '',
       'displayName': m['displayName'] as String? ?? '',
     };
+  }
+
+  /// Envoie un fichier vidéo au serveur (évite le base64 dans Firestore, limite ~1 Mo).
+  /// Retourne l’URL absolue à stocker dans [media] du post.
+  Future<String> uploadPostVideo(File file, {String? filename}) async {
+    final name = (filename != null && filename.isNotEmpty)
+        ? filename
+        : file.path.split(Platform.pathSeparator).last;
+    final formData = FormData.fromMap({
+      'video': await MultipartFile.fromFile(
+        file.path,
+        filename: name.isNotEmpty ? name : 'video.mp4',
+      ),
+    });
+    final res = await _dio.post<Map<String, dynamic>>('/posts/media-video', data: formData);
+    final url = res.data?['url'] as String?;
+    if (url == null || url.isEmpty) {
+      throw Exception('Réponse upload invalide');
+    }
+    return url;
   }
 
   Future<void> createPost({

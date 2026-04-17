@@ -10,6 +10,8 @@ import 'package:record/record.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/auth/auth_notifier.dart';
+import '../../core/l10n/strings.dart';
+import '../../core/realtime/socket_hub.dart';
 import '../../core/theme/app_colors.dart';
 import '../providers/app_providers.dart';
 import '../widgets/responsive_content.dart';
@@ -31,8 +33,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   String? conversationId;
   List<Map<String, dynamic>> messages = [];
-  Timer? _poll;
   StreamSubscription<void>? _playSub;
+  VoidCallback? _socketOff;
   bool loading = true;
 
   String? _peerPhone;
@@ -61,7 +63,30 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     }
     await _loadPeerPhone();
     await _refresh();
-    _poll = Timer.periodic(const Duration(seconds: 4), (_) => _refresh());
+    _subscribeSocket();
+  }
+
+  void _subscribeSocket() {
+    final cid = conversationId;
+    if (cid == null || cid.isEmpty) return;
+    final meId = ref.read(authNotifierProvider).user?.id;
+    if (meId == null) return;
+    final hub = ref.read(socketHubProvider);
+    hub.connect(meId);
+    hub.joinConversation(cid);
+    _socketOff?.call();
+    _socketOff = hub.addNewMessageListener((data) {
+      if (data is! Map) return;
+      if (data['conversationId']?.toString() != cid) return;
+      final mid = data['id']?.toString();
+      if (mid != null && messages.any((m) => m['id']?.toString() == mid)) return;
+      if (!mounted) return;
+      final row = Map<String, dynamic>.from(
+        data.map((k, v) => MapEntry(k.toString(), v)),
+      );
+      setState(() => messages = [...messages, row]);
+      ref.invalidate(inboxUnreadTotalProvider);
+    });
   }
 
   Future<void> _loadPeerPhone() async {
@@ -106,7 +131,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         ref.invalidate(inboxUnreadTotalProvider);
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Audio: $e')));
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${S.audioErrorPrefix}$e')));
         }
       } finally {
         try {
@@ -119,7 +144,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       if (!await _recorder.hasPermission()) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Autorisez le micro dans les paramètres.')),
+            const SnackBar(content: Text(S.allowMicSettings)),
           );
         }
         return;
@@ -133,7 +158,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       if (mounted) setState(() => _recording = true);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Enregistrement: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${S.recordErrorPrefix}$e')));
       }
     }
   }
@@ -161,7 +186,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Lecture: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('${S.playErrorPrefix}$e')));
       }
     }
   }
@@ -170,7 +195,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     if (_peerPhone == null || _peerPhone!.isEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Numéro non renseigné pour ce contact.')),
+          const SnackBar(content: Text(S.phoneNotSet)),
         );
       }
       return;
@@ -181,7 +206,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } else if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Numéro : $_peerPhone')),
+        SnackBar(content: Text('${S.phoneNumberPrefix}$_peerPhone')),
       );
     }
   }
@@ -202,7 +227,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       });
       if (phone.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Numéro non renseigné pour ce contact.')),
+          const SnackBar(content: Text(S.phoneNotSet)),
         );
         return;
       }
@@ -217,7 +242,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   @override
   void dispose() {
-    _poll?.cancel();
+    _socketOff?.call();
+    final cid = conversationId;
+    if (cid != null && cid.isNotEmpty) {
+      ref.read(socketHubProvider).leaveConversation(cid);
+    }
     _playSub?.cancel();
     _text.dispose();
     unawaited(_recorder.dispose());
@@ -257,7 +286,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         centerTitle: true,
         actions: [
           IconButton(
-            tooltip: 'Appeler',
+            tooltip: S.callTooltip,
             onPressed: _loadingPhone ? null : _loadPhoneForCall,
             icon: _loadingPhone
                 ? const SizedBox(
@@ -314,7 +343,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                         const SizedBox(width: 8),
                                         Flexible(
                                           child: Text(
-                                            _playingMessageId == mid ? 'Lecture…' : 'Message vocal',
+                                            _playingMessageId == mid ? S.audioPlaying : S.voiceMessage,
                                             style: TextStyle(color: mine ? Colors.white : AppColors.ink),
                                           ),
                                         ),
@@ -344,7 +373,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           IconButton.filledTonal(
-                            tooltip: _recording ? 'Arrêter et envoyer' : 'Enregistrer un vocal',
+                            tooltip: _recording ? S.micStopSend : S.micRecord,
                             onPressed: _toggleRecording,
                             style: IconButton.styleFrom(
                               backgroundColor: _recording
@@ -360,11 +389,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                               maxLines: 5,
                               keyboardType: TextInputType.multiline,
                               textCapitalization: TextCapitalization.sentences,
-                              decoration: const InputDecoration(
-                                hintText: 'Écrire un message…',
-                                border: OutlineInputBorder(),
+                              decoration: InputDecoration(
+                                hintText: S.chatInputHint,
+                                border: const OutlineInputBorder(),
                                 isDense: true,
-                                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                               ),
                               onSubmitted: (_) => _sendText(),
                             ),

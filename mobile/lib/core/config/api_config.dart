@@ -31,6 +31,44 @@ class ApiConfig {
     return 'http://127.0.0.1:4000/api/v1';
   }
 
+  /// Origine HTTP pour Socket.IO (sans `/api/v1`).
+  static String get socketOrigin {
+    final u = baseUrl;
+    final idx = u.indexOf('/api/v1');
+    if (idx >= 0) return u.substring(0, idx);
+    final idx2 = u.indexOf('/api/');
+    if (idx2 >= 0) return u.substring(0, idx2);
+    return u.replaceAll(RegExp(r'/+$'), '');
+  }
+
+  /// Lecture des vidéos servies sous `/uploads/...` : même hôte/port que l’API
+  /// (évite `localhost` vs `127.0.0.1` vs `10.0.2.2` selon ce que le serveur a renvoyé).
+  static Uri resolvedMediaUri(String media) {
+    final m = media.trim();
+    if (m.isEmpty) {
+      return Uri.parse(media);
+    }
+    final origin = Uri.parse(socketOrigin);
+    if (m.startsWith('/')) {
+      return origin.resolve(m);
+    }
+    final u = Uri.tryParse(m);
+    if (u == null || !(u.scheme == 'http' || u.scheme == 'https')) {
+      return Uri.parse(m);
+    }
+    // Uniquement nos fichiers API : ne pas réécrire une URL CDN / autre domaine.
+    if (u.path.startsWith('/uploads/')) {
+      return Uri(
+        scheme: origin.scheme,
+        host: origin.host,
+        port: origin.hasPort ? origin.port : null,
+        path: u.path,
+        query: u.hasQuery ? u.query : null,
+      );
+    }
+    return u;
+  }
+
   static String _normalizeApiBase(String raw) {
     var u = raw.trim().replaceAll(RegExp(r'/+$'), '');
     if (u.isEmpty) {

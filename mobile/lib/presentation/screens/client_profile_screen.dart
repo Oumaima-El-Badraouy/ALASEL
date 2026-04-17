@@ -5,14 +5,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/auth/auth_notifier.dart';
+import '../../core/l10n/strings.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/form_spacing.dart';
 import '../../data/models/post_model.dart';
 import '../../data/models/user_model.dart';
 import '../providers/app_providers.dart';
 import '../widgets/author_avatar.dart';
+import '../widgets/cin_upload_section.dart';
 
 final _myDemandsProvider = FutureProvider.autoDispose<List<PostModel>>((ref) async {
+  ref.watch(feedSocketTickProvider);
   final all = await ref.watch(marketplaceRepositoryProvider).myPosts();
   return all.where((p) => p.isDemand).toList();
 });
@@ -52,7 +55,7 @@ class ClientProfileScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.sand,
       body: u == null
-          ? const Center(child: Text('Non connecté'))
+          ? const Center(child: Text(S.notLoggedIn))
           : CustomScrollView(
               slivers: [
                 SliverAppBar(
@@ -65,7 +68,7 @@ class ClientProfileScreen extends ConsumerWidget {
                   actions: [
                     IconButton(
                       icon: const Icon(Icons.add_box_outlined),
-                      tooltip: 'Nouvelle demande',
+                      tooltip: S.newDemandTooltip,
                       onPressed: () => context.push('/create-post?type=client_request'),
                     ),
                     IconButton(
@@ -90,8 +93,8 @@ class ClientProfileScreen extends ConsumerWidget {
                                   data: (d) => Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                     children: [
-                                      _statColumn(context, '${d.length}', 'demandes'),
-                                      _statColumn(context, '$n', 'abonnements'),
+                                      _statColumn(context, '${d.length}', S.statDemands),
+                                      _statColumn(context, '$n', S.statFollows),
                                     ],
                                   ),
                                   loading: () => const SizedBox(height: 40),
@@ -116,7 +119,7 @@ class ClientProfileScreen extends ConsumerWidget {
                             children: [
                               Icon(Icons.verified_outlined, size: 16, color: AppColors.deepBlue.withValues(alpha: 0.8)),
                               const SizedBox(width: 4),
-                              Text('Mediouna', style: TextStyle(fontSize: 13, color: AppColors.deepBlue.withValues(alpha: 0.85))),
+                              Text(S.mediouna, style: TextStyle(fontSize: 13, color: AppColors.deepBlue.withValues(alpha: 0.85))),
                             ],
                           ),
                         ],
@@ -124,12 +127,18 @@ class ClientProfileScreen extends ConsumerWidget {
                         const Divider(height: 1),
                         const SizedBox(height: 12),
                         Text(
-                          'Mes demandes',
+                          S.myDemandsSection,
                           style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
                         ),
                         const SizedBox(height: 8),
                       ],
                     ),
+                  ),
+                ),
+                const SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(20, 0, 20, 8),
+                    child: CinUploadSection(),
                   ),
                 ),
                 demandsAsync.when(
@@ -139,7 +148,7 @@ class ClientProfileScreen extends ConsumerWidget {
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 20),
                           child: Text(
-                            'Aucune demande. Touche + pour en publier une.',
+                            S.noDemandsHint,
                             style: TextStyle(color: AppColors.muted.withValues(alpha: 0.9)),
                           ),
                         ),
@@ -221,7 +230,7 @@ class ClientProfileScreen extends ConsumerWidget {
           children: [
             ListTile(
               leading: const Icon(Icons.edit_outlined),
-              title: const Text('Modifier le profil'),
+              title: const Text(S.editProfile),
               onTap: () {
                 Navigator.pop(ctx);
                 _editSheet(context, ref, u);
@@ -229,7 +238,7 @@ class ClientProfileScreen extends ConsumerWidget {
             ),
             ListTile(
               leading: const Icon(Icons.logout),
-              title: const Text('Déconnexion'),
+              title: const Text(S.logout),
               onTap: () async {
                 Navigator.pop(ctx);
                 await ref.read(authNotifierProvider.notifier).logout();
@@ -246,14 +255,14 @@ class ClientProfileScreen extends ConsumerWidget {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Supprimer la demande ?'),
-        content: const Text('Cette action est définitive.'),
+        title: const Text(S.deleteRequestTitle),
+        content: const Text(S.deleteRequestBody),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Annuler')),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text(S.cancel)),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: AppColors.terracotta),
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Supprimer'),
+            child: const Text(S.deleteAction),
           ),
         ],
       ),
@@ -263,7 +272,7 @@ class ClientProfileScreen extends ConsumerWidget {
       await ref.read(marketplaceRepositoryProvider).deletePost(postId);
       ref.invalidate(_myDemandsProvider);
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Demande supprimée')));
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text(S.requestDeletedSnack)));
       }
     } catch (e) {
       if (context.mounted) {
@@ -284,11 +293,11 @@ class ClientProfileScreen extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Text('Modifier', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18)),
+            const Text(S.editSheetTitle, style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18)),
             const SizedBox(height: 16),
-            TextField(controller: first, decoration: const InputDecoration(labelText: 'Prénom')),
+            TextField(controller: first, decoration: const InputDecoration(labelText: S.fieldFirstName)),
             FormSpacing.betweenInputs,
-            TextField(controller: last, decoration: const InputDecoration(labelText: 'Nom')),
+            TextField(controller: last, decoration: const InputDecoration(labelText: S.fieldLastName)),
             const SizedBox(height: 16),
             FilledButton(
               onPressed: () async {
@@ -299,7 +308,7 @@ class ClientProfileScreen extends ConsumerWidget {
                 await ref.read(authNotifierProvider.notifier).refreshMe();
                 if (ctx.mounted) Navigator.pop(ctx);
               },
-              child: const Text('Enregistrer'),
+              child: const Text(S.save),
             ),
           ],
         ),
@@ -328,7 +337,7 @@ class _DemandTile extends StatelessWidget {
             AuthorAvatar(
               radius: 22,
               photoUrl: post.authorPhotoUrl,
-              fallbackLabel: post.authorDisplayName ?? 'Moi',
+              fallbackLabel: post.authorDisplayName ?? S.meLabel,
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -343,7 +352,7 @@ class _DemandTile extends StatelessWidget {
               ),
             ),
             IconButton(
-              tooltip: 'Supprimer',
+              tooltip: S.deleteTooltip,
               icon: const Icon(Icons.delete_outline, color: AppColors.terracotta),
               onPressed: onDelete,
             ),

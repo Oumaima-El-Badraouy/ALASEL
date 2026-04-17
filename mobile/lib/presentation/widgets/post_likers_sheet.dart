@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/l10n/strings.dart';
 import '../../core/theme/app_colors.dart';
 import '../providers/app_providers.dart';
 import 'author_avatar.dart';
@@ -45,7 +46,7 @@ class _PostLikersSheetState extends ConsumerState<PostLikersSheet> {
     final fn = (m['firstName'] as String? ?? '').trim();
     final ln = (m['lastName'] as String? ?? '').trim();
     if (fn.isNotEmpty || ln.isNotEmpty) return '$fn $ln'.trim();
-    return (m['authorDisplayName'] as String?)?.trim() ?? 'Utilisateur';
+    return (m['authorDisplayName'] as String?)?.trim() ?? S.userFallback;
   }
 
   @override
@@ -61,7 +62,7 @@ class _PostLikersSheetState extends ConsumerState<PostLikersSheet> {
               padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
               child: Row(
                 children: [
-                  const Text('J’aime', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18)),
+                  const Text(S.likesSheetTitle, style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18)),
                   const Spacer(),
                   IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close)),
                 ],
@@ -75,7 +76,7 @@ class _PostLikersSheetState extends ConsumerState<PostLikersSheet> {
                       ? Center(child: Text(_err!, style: const TextStyle(color: AppColors.muted)))
                       : _items.isEmpty
                           ? const Center(
-                              child: Text('Personne pour l’instant.', style: TextStyle(color: AppColors.muted)),
+                              child: Text(S.noLikersYet, style: TextStyle(color: AppColors.muted)),
                             )
                           : ListView.separated(
                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -84,7 +85,7 @@ class _PostLikersSheetState extends ConsumerState<PostLikersSheet> {
                               itemBuilder: (_, i) {
                                 final m = _items[i];
                                 final role = m['role'] as String? ?? '';
-                                final label = role == 'artisan' ? 'Artisan' : (role == 'client' ? 'Client' : '');
+                                final label = role == 'artisan' ? S.roleArtisanShort : (role == 'client' ? S.roleClientShort : '');
                                 return ListTile(
                                   leading: AuthorAvatar(
                                     radius: 22,

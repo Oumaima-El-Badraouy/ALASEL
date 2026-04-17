@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/l10n/strings.dart';
 import '../../core/theme/app_colors.dart';
 import '../../data/models/post_model.dart';
 import '../providers/app_providers.dart';
@@ -8,6 +9,7 @@ import '../widgets/moroccan_pattern_background.dart';
 import '../widgets/post_card.dart';
 
 final _discoverProvider = FutureProvider.autoDispose<List<PostModel>>((ref) async {
+  ref.watch(feedSocketTickProvider);
   final me = await ref.watch(marketplaceRepositoryProvider).me();
   final all = await ref.watch(marketplaceRepositoryProvider).postsFeed(postType: 'artisan_service');
   return all.where((p) => p.userId != me.id).toList();
@@ -20,12 +22,12 @@ class ArtisanDiscoverScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final async = ref.watch(_discoverProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Autres artisans')),
+      appBar: AppBar(title: const Text(S.otherArtisansTitle)),
       body: MoroccanPatternBackground(
         child: async.when(
           data: (posts) {
             if (posts.isEmpty) {
-              return const Center(child: Text('Aucun autre service publié.'));
+              return const Center(child: Text(S.noOtherServices));
             }
             return RefreshIndicator(
               onRefresh: () async => ref.invalidate(_discoverProvider),

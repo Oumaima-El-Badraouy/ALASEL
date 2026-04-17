@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/l10n/strings.dart';
 import '../../core/theme/app_colors.dart';
 import '../../data/models/post_model.dart';
 import '../providers/app_providers.dart';
@@ -8,10 +9,6 @@ import '../widgets/client_feed_post_card.dart';
 
 final _favoritesFeedProvider = FutureProvider.autoDispose<List<PostModel>>((ref) async {
   return ref.watch(marketplaceRepositoryProvider).favoritePosts();
-});
-
-final _followProvider = FutureProvider.autoDispose.family<bool, String>((ref, artisanId) async {
-  return ref.watch(marketplaceRepositoryProvider).isFollowing(artisanId);
 });
 
 class ClientFavoritesScreen extends ConsumerWidget {
@@ -36,7 +33,7 @@ class ClientFavoritesScreen extends ConsumerWidget {
                 backgroundColor: AppColors.white,
                 surfaceTintColor: Colors.transparent,
                 elevation: 0.5,
-                title: Text('Favoris', style: TextStyle(fontWeight: FontWeight.w800)),
+                title: Text(S.favoritesTitle, style: TextStyle(fontWeight: FontWeight.w800)),
               ),
               async.when(
                 data: (posts) {
@@ -47,7 +44,7 @@ class ClientFavoritesScreen extends ConsumerWidget {
                         child: Padding(
                           padding: EdgeInsets.all(24),
                           child: Text(
-                            'Aucun favori pour l’instant.\nAjoutez des posts depuis l’accueil.',
+                            S.favoritesEmpty,
                             textAlign: TextAlign.center,
                             style: TextStyle(color: AppColors.muted, height: 1.4),
                           ),
@@ -88,7 +85,7 @@ class _FavoritePostRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final fol = ref.watch(_followProvider(post.userId));
+    final fol = ref.watch(artisanFollowStatusProvider(post.userId));
     return fol.when(
       data: (isF) => ClientFeedPostCard(
         post: post,
@@ -100,7 +97,7 @@ class _FavoritePostRow extends ConsumerWidget {
           } else {
             await repo.followArtisan(post.userId);
           }
-          ref.invalidate(_followProvider(post.userId));
+          ref.invalidate(artisanFollowStatusProvider(post.userId));
         },
         onFavoriteChanged: onFavoriteChanged,
         onEngagementChanged: () => ref.invalidate(_favoritesFeedProvider),

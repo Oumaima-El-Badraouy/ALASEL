@@ -18,6 +18,23 @@ class AuthorAvatar extends StatelessWidget {
   final String? photoUrl;
   final String fallbackLabel;
 
+  Widget _fallback(double r) {
+    final s = fallbackLabel.trim();
+    final ch = s.isNotEmpty ? s[0].toUpperCase() : '?';
+    return CircleAvatar(
+      radius: r,
+      backgroundColor: AppColors.deepBlue.withValues(alpha: 0.12),
+      child: Text(
+        ch,
+        style: TextStyle(
+          color: AppColors.deepBlue,
+          fontWeight: FontWeight.w800,
+          fontSize: r * 0.95,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final p = photoUrl?.trim();
@@ -31,26 +48,28 @@ class AuthorAvatar extends StatelessWidget {
         } catch (_) {}
       }
       if (p.startsWith('http://') || p.startsWith('https://')) {
-        return CircleAvatar(
-          radius: radius,
-          backgroundColor: AppColors.deepBlue.withValues(alpha: 0.12),
-          backgroundImage: CachedNetworkImageProvider(p),
+        final d = radius * 2;
+        return ClipOval(
+          child: CachedNetworkImage(
+            imageUrl: p,
+            width: d,
+            height: d,
+            fit: BoxFit.cover,
+            fadeInDuration: Duration.zero,
+            placeholder: (_, __) => CircleAvatar(
+              radius: radius,
+              backgroundColor: AppColors.deepBlue.withValues(alpha: 0.08),
+              child: SizedBox(
+                width: radius,
+                height: radius,
+                child: const CircularProgressIndicator(strokeWidth: 2),
+              ),
+            ),
+            errorWidget: (_, __, ___) => _fallback(radius),
+          ),
         );
       }
     }
-    final s = fallbackLabel.trim();
-    final ch = s.isNotEmpty ? s[0].toUpperCase() : '?';
-    return CircleAvatar(
-      radius: radius,
-      backgroundColor: AppColors.deepBlue.withValues(alpha: 0.12),
-      child: Text(
-        ch,
-        style: TextStyle(
-          color: AppColors.deepBlue,
-          fontWeight: FontWeight.w800,
-          fontSize: radius * 0.95,
-        ),
-      ),
-    );
+    return _fallback(radius);
   }
 }

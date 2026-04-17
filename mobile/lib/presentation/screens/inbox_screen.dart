@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/l10n/strings.dart';
 import '../../core/theme/app_colors.dart';
 import '../providers/app_providers.dart';
 import '../widgets/responsive_content.dart';
@@ -54,7 +55,7 @@ class _InboxScreenState extends ConsumerState<InboxScreen> {
     return Scaffold(
       backgroundColor: AppColors.sand,
       appBar: AppBar(
-        title: const Text('Messages'),
+        title: const Text(S.messages),
         centerTitle: true,
       ),
       body: ResponsiveContent(
@@ -70,7 +71,7 @@ class _InboxScreenState extends ConsumerState<InboxScreen> {
                         children: [
                           Text(_err!, textAlign: TextAlign.center),
                           const SizedBox(height: 16),
-                          FilledButton(onPressed: _load, child: const Text('Réessayer')),
+                          FilledButton(onPressed: _load, child: const Text(S.retry)),
                         ],
                       ),
                     ),
@@ -81,7 +82,7 @@ class _InboxScreenState extends ConsumerState<InboxScreen> {
                         ? ListView(
                             children: const [
                               SizedBox(height: 120),
-                              Center(child: Text('Aucun message pour l’instant.')),
+                              Center(child: Text(S.noMessagesYet)),
                             ],
                           )
                         : ListView.separated(
@@ -91,7 +92,7 @@ class _InboxScreenState extends ConsumerState<InboxScreen> {
                             itemBuilder: (context, i) {
                               final c = _items[i];
                               final peerId = c['peerId'] as String? ?? '';
-                              final name = c['peerDisplayName'] as String? ?? 'Chat';
+                              final name = c['peerDisplayName'] as String? ?? S.chatPeerFallback;
                               final unread = (c['unreadCount'] as num?)?.toInt() ?? 0;
                               return ListTile(
                                 leading: CircleAvatar(

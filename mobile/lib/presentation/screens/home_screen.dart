@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/l10n/strings.dart';
 import '../../core/theme/app_colors.dart';
 import '../widgets/moroccan_card.dart';
 import '../widgets/moroccan_pattern_background.dart';
@@ -18,32 +19,29 @@ class HomeScreen extends StatelessWidget {
             padding: const EdgeInsets.all(20),
             children: [
               const MoroccanSectionHeader(
-                arabic: 'مرحبا — الأصل',
-                title: 'Bienvenue',
-                subtitle: 'Motifs zellij, couleurs du Maroc : confiance et artisanat authentique.',
+                arabic: S.homeDecorLine,
+                title: S.homeMainTitle,
+                subtitle: S.homeIntroSubtitle,
               ),
               const SizedBox(height: 20),
               _ctaCard(
                 context,
-                title: 'Explorer les artisans',
-                titleAr: 'استكشف الحرفيين',
-                subtitle: 'Métier, ville, disponibilité, avis',
+                title: S.homeCardExploreTitle,
+                subtitle: S.homeCardExploreSubtitle,
                 icon: Icons.search_rounded,
                 onTap: () => context.push('/explore'),
               ),
               _ctaCard(
                 context,
-                title: 'Poster une demande',
-                titleAr: 'طلب خدمة',
-                subtitle: 'Estimation & matching',
+                title: S.homeCardRequestTitle,
+                subtitle: S.homeCardRequestSubtitle,
                 icon: Icons.edit_calendar_outlined,
                 onTap: () => context.push('/request'),
               ),
               _ctaCard(
                 context,
-                title: 'Espace artisan',
-                titleAr: 'فضاء الحرفي',
-                subtitle: 'Profil, portfolio avant/après',
+                title: S.homeCardArtisanTitle,
+                subtitle: S.homeCardArtisanSubtitle,
                 icon: Icons.handyman_outlined,
                 onTap: () => context.push('/artisan'),
               ),
@@ -57,7 +55,6 @@ class HomeScreen extends StatelessWidget {
   Widget _ctaCard(
     BuildContext context, {
     required String title,
-    required String titleAr,
     required String subtitle,
     required IconData icon,
     required VoidCallback onTap,
@@ -86,14 +83,6 @@ class HomeScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  titleAr,
-                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        color: AppColors.zellijGlaze,
-                        fontWeight: FontWeight.w700,
-                      ),
-                ),
-                const SizedBox(height: 2),
                 Text(
                   title,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),

@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/l10n/strings.dart';
 import '../../core/theme/app_colors.dart';
 import '../../data/models/artisan_model.dart';
 import '../providers/app_providers.dart';
@@ -24,12 +25,9 @@ class ArtisanDetailScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: MoroccanAppBar(
-        title: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('حرفي', style: Theme.of(context).textTheme.labelLarge?.copyWith(color: AppColors.zellijGlaze)),
-            const Text('Profil artisan'),
-          ],
+        title: Text(
+          S.artisanDetailSubtitle,
+          style: Theme.of(context).textTheme.labelLarge?.copyWith(color: AppColors.zellijGlaze),
         ),
       ),
       body: MoroccanPatternBackground(
@@ -53,7 +51,8 @@ class ArtisanDetailScreen extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(a.displayName, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
-                        Text('Trust ${a.trustScore} · ${a.avgRating ?? 0}★ (${a.reviewCount ?? 0})',
+                        Text(
+                            '${S.trustWord} ${a.trustScore} · ${a.avgRating ?? 0}★ (${a.reviewCount ?? 0})',
                             style: const TextStyle(color: AppColors.muted)),
                       ],
                     ),
@@ -63,10 +62,10 @@ class ArtisanDetailScreen extends ConsumerWidget {
               const SizedBox(height: 12),
               Text(a.bio ?? '', style: Theme.of(context).textTheme.bodyMedium),
               const SizedBox(height: 16),
-              Text('Portfolio — avant / après', style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
+              Text(S.portfolioSection, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700)),
               const SizedBox(height: 8),
               if (a.portfolio.isEmpty)
-                const Text('Pas encore de photos.', style: TextStyle(color: AppColors.muted))
+                const Text(S.noPortfolioYet, style: TextStyle(color: AppColors.muted))
               else
                 ...a.portfolio.map((p) => _PortfolioCard(item: p)),
             ],

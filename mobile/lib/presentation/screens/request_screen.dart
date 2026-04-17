@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/l10n/strings.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/form_spacing.dart';
 import '../providers/app_providers.dart';
@@ -47,8 +48,9 @@ class _RequestScreenState extends ConsumerState<RequestScreen> {
       city: _city.text.trim(),
       urgency: urgency,
     );
+    ref.read(feedSocketTickProvider.notifier).state++;
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Demande publiée')));
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text(S.requestPublishedSnack)));
     }
   }
 
@@ -56,12 +58,9 @@ class _RequestScreenState extends ConsumerState<RequestScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: MoroccanAppBar(
-        title: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('طلب جديد', style: Theme.of(context).textTheme.labelLarge?.copyWith(color: AppColors.zellijGlaze)),
-            const Text('Nouvelle demande'),
-          ],
+        title: Text(
+          S.newRequestPost,
+          style: Theme.of(context).textTheme.labelLarge?.copyWith(color: AppColors.zellijGlaze),
         ),
       ),
       body: MoroccanPatternBackground(
@@ -70,19 +69,19 @@ class _RequestScreenState extends ConsumerState<RequestScreen> {
           children: [
             TextField(
               controller: _title,
-              decoration: const InputDecoration(labelText: 'Titre'),
+              decoration: const InputDecoration(labelText: S.fieldTitle),
             ),
             FormSpacing.betweenInputs,
             DropdownButtonFormField<String>(
               value: category,
-              decoration: const InputDecoration(labelText: 'Catégorie'),
-              items: const [
-                DropdownMenuItem(value: 'plumbing', child: Text('Plomberie')),
-                DropdownMenuItem(value: 'painting', child: Text('Peinture')),
-                DropdownMenuItem(value: 'carpentry', child: Text('Menuiserie')),
-                DropdownMenuItem(value: 'electricity', child: Text('Électricité')),
-                DropdownMenuItem(value: 'tiling', child: Text('Carrelage')),
-                DropdownMenuItem(value: 'hvac', child: Text('Climatisation')),
+              decoration: const InputDecoration(labelText: S.fieldCategory),
+              items: [
+                DropdownMenuItem(value: 'plumbing', child: Text(S.categoryLabel('plumbing'))),
+                DropdownMenuItem(value: 'painting', child: Text(S.categoryLabel('painting'))),
+                DropdownMenuItem(value: 'carpentry', child: Text(S.categoryLabel('carpentry'))),
+                DropdownMenuItem(value: 'electricity', child: Text(S.categoryLabel('electricity'))),
+                DropdownMenuItem(value: 'tiling', child: Text(S.categoryLabel('tiling'))),
+                DropdownMenuItem(value: 'hvac', child: Text(S.categoryLabel('hvac'))),
               ],
               onChanged: (v) => setState(() => category = v ?? 'plumbing'),
             ),
@@ -90,12 +89,12 @@ class _RequestScreenState extends ConsumerState<RequestScreen> {
             TextField(
               controller: _desc,
               maxLines: 3,
-              decoration: const InputDecoration(labelText: 'Description'),
+              decoration: const InputDecoration(labelText: S.fieldDescription),
             ),
             FormSpacing.betweenInputs,
             TextField(
               controller: _city,
-              decoration: const InputDecoration(labelText: 'Ville'),
+              decoration: const InputDecoration(labelText: S.fieldCity),
             ),
             FormSpacing.betweenInputs,
             Row(
@@ -103,7 +102,7 @@ class _RequestScreenState extends ConsumerState<RequestScreen> {
                 Expanded(
                   child: TextField(
                     keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(labelText: 'Surface (m²) — optionnel'),
+                    decoration: const InputDecoration(labelText: S.fieldSurfaceOptional),
                     onChanged: (v) => setState(() => sqm = double.tryParse(v)),
                   ),
                 ),
@@ -111,10 +110,10 @@ class _RequestScreenState extends ConsumerState<RequestScreen> {
                 Expanded(
                   child: DropdownButtonFormField<String>(
                     value: urgency,
-                    decoration: const InputDecoration(labelText: 'Urgence'),
+                    decoration: const InputDecoration(labelText: S.fieldUrgency),
                     items: const [
-                      DropdownMenuItem(value: 'normal', child: Text('Normal')),
-                      DropdownMenuItem(value: 'urgent', child: Text('Urgent')),
+                      DropdownMenuItem(value: 'normal', child: Text(S.urgencyNormal)),
+                      DropdownMenuItem(value: 'urgent', child: Text(S.urgencyUrgent)),
                     ],
                     onChanged: (v) => setState(() => urgency = v ?? 'normal'),
                   ),
@@ -125,7 +124,7 @@ class _RequestScreenState extends ConsumerState<RequestScreen> {
             OutlinedButton.icon(
               onPressed: _loadEstimate,
               icon: const Icon(Icons.calculate_outlined),
-              label: const Text('Estimer le budget (MAD)'),
+              label: const Text(S.estimateBudget),
             ),
             if (estimate != null) ...[
               const SizedBox(height: 12),
@@ -147,7 +146,7 @@ class _RequestScreenState extends ConsumerState<RequestScreen> {
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: _submit,
-              child: const Text('Publier la demande'),
+              child: const Text(S.publishRequest),
             ),
           ],
         ),

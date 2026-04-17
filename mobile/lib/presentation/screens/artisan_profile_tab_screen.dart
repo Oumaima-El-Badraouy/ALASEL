@@ -7,14 +7,17 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../core/auth/auth_notifier.dart';
+import '../../core/l10n/strings.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/form_spacing.dart';
 import '../../data/models/user_model.dart';
 import '../providers/app_providers.dart';
+import '../widgets/cin_upload_section.dart';
 import '../widgets/moroccan_pattern_background.dart';
 
 /// Nombre de demandes clients (posts `client_request`) visibles pour les artisans.
 final _clientDemandsCountProvider = FutureProvider.autoDispose<int>((ref) async {
+  ref.watch(feedSocketTickProvider);
   final list = await ref.watch(marketplaceRepositoryProvider).postsFeed(postType: 'client_request');
   return list.length;
 });
@@ -91,7 +94,7 @@ class _ArtisanProfileTabScreenState extends ConsumerState<ArtisanProfileTabScree
       await ref.read(marketplaceRepositoryProvider).patchMe({'photoUrl': url});
       await ref.read(authNotifierProvider.notifier).refreshMe();
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Photo de profil mise à jour')));
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text(S.photoProfileUpdated)));
       }
     } catch (e) {
       if (mounted) {
@@ -114,7 +117,7 @@ class _ArtisanProfileTabScreenState extends ConsumerState<ArtisanProfileTabScree
       });
       await ref.read(authNotifierProvider.notifier).refreshMe();
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Profil mis à jour')));
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text(S.profileUpdatedSnack)));
       }
     } finally {
       if (mounted) setState(() => saving = false);
@@ -174,7 +177,7 @@ class _ArtisanProfileTabScreenState extends ConsumerState<ArtisanProfileTabScree
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Mon profil artisan'),
+        title: const Text(S.artisanMyProfileTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
@@ -217,7 +220,7 @@ class _ArtisanProfileTabScreenState extends ConsumerState<ArtisanProfileTabScree
                                 child: IconButton(
                                   icon: const Icon(Icons.camera_alt, color: Colors.white, size: 20),
                                   onPressed: _uploadingPhoto ? null : _pickPhoto,
-                                  tooltip: 'Changer la photo',
+                                  tooltip: S.changePhotoTooltip,
                                 ),
                               ),
                             ),
@@ -243,24 +246,24 @@ class _ArtisanProfileTabScreenState extends ConsumerState<ArtisanProfileTabScree
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       followersAsync.when(
-                        data: (n) => _StatChip(label: 'Abonnés', value: '$n'),
-                        loading: () => const _StatChip(label: 'Abonnés', value: '…'),
-                        error: (_, __) => const _StatChip(label: 'Abonnés', value: '—'),
+                        data: (n) => _StatChip(label: S.followersLabel, value: '$n'),
+                        loading: () => _StatChip(label: S.followersLabel, value: '…'),
+                        error: (_, __) => _StatChip(label: S.followersLabel, value: '—'),
                       ),
                       demandsAsync.when(
-                        data: (n) => _StatChip(label: 'Demandes clients', value: '$n'),
-                        loading: () => const _StatChip(label: 'Demandes clients', value: '…'),
-                        error: (_, __) => const _StatChip(label: 'Demandes clients', value: '—'),
+                        data: (n) => _StatChip(label: S.clientDemandsCountLabel, value: '$n'),
+                        loading: () => _StatChip(label: S.clientDemandsCountLabel, value: '…'),
+                        error: (_, __) => _StatChip(label: S.clientDemandsCountLabel, value: '—'),
                       ),
                     ],
                   ),
                   const SizedBox(height: 20),
-                  const Text('Coordonnées', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15)),
+                  const Text(S.coordinatesSection, style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15)),
                   const SizedBox(height: 8),
-                  _ReadOnlyRow(label: 'E-mail', value: u.email.trim().isEmpty ? '—' : u.email),
+                  _ReadOnlyRow(label: S.emailRowLabel, value: u.email.trim().isEmpty ? '—' : u.email),
                   const SizedBox(height: 4),
                   Text(
-                    'Visible par les clients pour vous contacter (selon les écrans).',
+                    S.phoneVisibleHint,
                     style: TextStyle(fontSize: 12, color: AppColors.muted.withValues(alpha: 0.95)),
                   ),
                   const SizedBox(height: 12),
@@ -268,19 +271,19 @@ class _ArtisanProfileTabScreenState extends ConsumerState<ArtisanProfileTabScree
                     controller: _phone,
                     keyboardType: TextInputType.phone,
                     decoration: const InputDecoration(
-                      labelText: 'Téléphone',
-                      hintText: 'Numéro de téléphone',
+                      labelText: S.phoneFieldLabel,
+                      hintText: S.phoneFieldHint,
                       border: OutlineInputBorder(),
                     ),
                   ),
                   const SizedBox(height: 20),
-                  const Text('Identité', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15)),
+                  const Text(S.identitySection, style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15)),
                   const SizedBox(height: 8),
                   TextField(
                     controller: _firstName,
                     textCapitalization: TextCapitalization.words,
                     decoration: const InputDecoration(
-                      labelText: 'Prénom',
+                      labelText: S.fieldFirstName,
                       border: OutlineInputBorder(),
                     ),
                   ),
@@ -289,17 +292,17 @@ class _ArtisanProfileTabScreenState extends ConsumerState<ArtisanProfileTabScree
                     controller: _lastName,
                     textCapitalization: TextCapitalization.words,
                     decoration: const InputDecoration(
-                      labelText: 'Nom',
+                      labelText: S.fieldLastName,
                       border: OutlineInputBorder(),
                     ),
                   ),
                   const SizedBox(height: 20),
-                  const Text('Activité', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15)),
+                  const Text(S.activitySection, style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15)),
                   const SizedBox(height: 8),
                   TextField(
                     controller: _domain,
                     decoration: const InputDecoration(
-                      labelText: 'Domaine(s) — séparés par des virgules',
+                      labelText: S.fieldDomainsComma,
                       border: OutlineInputBorder(),
                     ),
                   ),
@@ -308,11 +311,12 @@ class _ArtisanProfileTabScreenState extends ConsumerState<ArtisanProfileTabScree
                     controller: _description,
                     maxLines: 5,
                     decoration: const InputDecoration(
-                      labelText: 'Description',
+                      labelText: S.fieldDescriptionLabel,
                       alignLabelWithHint: true,
                       border: OutlineInputBorder(),
                     ),
                   ),
+                  CinUploadSection(),
                   const SizedBox(height: 24),
                   FilledButton(
                     onPressed: saving ? null : _save,
@@ -322,7 +326,7 @@ class _ArtisanProfileTabScreenState extends ConsumerState<ArtisanProfileTabScree
                     ),
                     child: saving
                         ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                        : const Text('Enregistrer le profil'),
+                        : const Text(S.saveProfileButton),
                   ),
                 ],
               ),

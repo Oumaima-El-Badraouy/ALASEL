@@ -8,6 +8,7 @@ import * as reviews from '../controllers/reviews.controller.js';
 import * as messages from '../controllers/messages.controller.js';
 import * as estimator from '../controllers/estimator.controller.js';
 import * as posts from '../controllers/posts.controller.js';
+import * as postMedia from '../controllers/postMedia.controller.js';
 import * as follows from '../controllers/follows.controller.js';
 import * as favorites from '../controllers/favorites.controller.js';
 import * as postEngagement from '../controllers/postEngagement.controller.js';
@@ -31,6 +32,8 @@ r.get('/users/me/following', follows.listFollowing);
 /** Liste des posts favoris (client) — alias stable pour éviter tout conflit de route */
 r.get('/users/me/favorite-posts', posts.listFavorites);
 r.patch('/users/me', users.patchMe);
+r.post('/users/me/email/request-code', users.requestEmailVerification);
+r.post('/users/me/email/verify', users.verifyEmail);
 r.get('/users/peer/:peerId/contact', users.getPeerContact);
 
 r.get('/posts/feed', posts.listFeed);
@@ -42,6 +45,7 @@ r.get('/posts/:postId/likes', postEngagement.listPostLikes);
 r.post('/posts/:postId/like', postEngagement.toggleLike);
 r.post('/posts/:postId/favorite', favorites.addPostFavorite);
 r.delete('/posts/:postId/favorite', favorites.removePostFavorite);
+r.post('/posts/media-video', postMedia.videoUpload.single('video'), postMedia.uploadPostVideo);
 r.post('/posts', posts.createPost);
 r.patch('/posts/:id', posts.updatePost);
 r.delete('/posts/:id', posts.deletePost);
@@ -71,5 +75,7 @@ r.post('/conversations', messages.openOrGetConversation);
 r.post('/conversations/:id/read', messages.markConversationRead);
 r.get('/conversations/:id/messages', messages.listMessages);
 r.post('/conversations/:id/messages', messages.postMessage);
+
+r.use(postMedia.uploadPostVideoError);
 
 export default r;

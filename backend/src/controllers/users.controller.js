@@ -2,7 +2,7 @@ import * as db from '../db/index.js';
 
 function stripSecrets(u) {
   if (!u) return null;
-  const { passwordHash, ...rest } = u;
+  const { passwordHash, emailVerifyCode, ...rest } = u;
   return rest;
 }
 
@@ -151,6 +151,8 @@ export async function patchMe(req, res) {
       'bio',
       'description',
       'domain',
+      'cinRectoUrl',
+      'cinVersoUrl',
     ];
     const patch = {};
     for (const k of allowed) {
@@ -197,6 +199,48 @@ export async function patchMe(req, res) {
 }
 
 /** GET /users/peer/:peerId/contact — téléphone de l’autre partie (client ↔ artisan, chat) */
+/** POST /users/me/email/request-code — code 6 chiffres (démo : renvoyé dans la réponse si MEMORY_STORE). */
+export async function requestEmailVerification(req, res) {
+  try {
+    const code = String(Math.floor(100000 + Math.random() * 900000));
+    const expires = Date.now() + 15 * 60 * 1000;
+    await db.docSet('users', req.user.uid, {
+      emailVerifyCode: code,
+      emailVerifyExpires: expires,
+    });
+    const demo = process.env.MEMORY_STORE === '1';
+    return res.json({ ok: true, ...(demo ? { demoCode: code } : {}) });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
+}
+
+/** POST /users/me/email/verify — body: { code: string } */
+export async function verifyEmail(req, res) {
+  try {
+    const code = String(req.body?.code ?? '').trim();
+    if (code.length < 4) {
+      return res.status(400).json({ error: 'code required' });
+    }
+    const u = await db.docGet('users', req.user.uid);
+    if (!u) return res.status(404).json({ error: 'User not found' });
+    if (String(u.emailVerifyCode) !== code) {
+      return res.status(400).json({ error: 'Invalid code' });
+    }
+    if (u.emailVerifyExpires && Date.now() > Number(u.emailVerifyExpires)) {
+      return res.status(400).json({ error: 'Code expired' });
+    }
+    await db.docSet('users', req.user.uid, {
+      emailVerified: true,
+      emailVerifyCode: null,
+      emailVerifyExpires: null,
+    });
+    return res.json({ ok: true, emailVerified: true });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
+}
+
 export async function getPeerContact(req, res) {
   try {
     const peerId = req.params.peerId;

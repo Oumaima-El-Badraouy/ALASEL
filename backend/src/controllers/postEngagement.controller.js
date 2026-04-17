@@ -1,4 +1,5 @@
 import * as db from '../db/index.js';
+import { emitUserInboxPing } from '../realtime.js';
 
 function authorFields(u) {
   if (!u) {
@@ -108,6 +109,18 @@ export async function addComment(req, res) {
     });
     const u = await db.docGet('users', req.user.uid);
     const a = authorFields(u);
+    const authorId = post.userId || post.authorId;
+    if (authorId && authorId !== req.user.uid) {
+      try {
+        emitUserInboxPing(String(authorId), {
+          type: 'new_comment',
+          postId,
+          preview: text.slice(0, 120),
+        });
+      } catch (_) {
+        /* best-effort realtime */
+      }
+    }
     return res.status(201).json({
       id,
       postId,

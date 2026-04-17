@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../core/auth/auth_notifier.dart';
+import '../../core/l10n/strings.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/form_spacing.dart';
 import '../widgets/moroccan_pattern_background.dart';
@@ -54,7 +55,7 @@ class _AuthRegisterClientScreenState extends ConsumerState<AuthRegisterClientScr
   Future<void> _submit() async {
     if (!mediouna) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Confirmez que vous habitez à Mediouna — obligatoire.')),
+        const SnackBar(content: Text(S.errMediounaRequired)),
       );
       return;
     }
@@ -63,7 +64,7 @@ class _AuthRegisterClientScreenState extends ConsumerState<AuthRegisterClientScr
     final tel = _phone.text.trim();
     if (fn.isEmpty || ln.isEmpty || tel.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Prénom, nom et numéro de téléphone sont obligatoires.')),
+        const SnackBar(content: Text(S.errClientRequiredFields)),
       );
       return;
     }
@@ -89,7 +90,7 @@ class _AuthRegisterClientScreenState extends ConsumerState<AuthRegisterClientScr
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Inscription client')),
+      appBar: AppBar(title: const Text(S.registerClientTitle)),
       body: MoroccanPatternBackground(
         child: ListView(
           padding: const EdgeInsets.all(20),
@@ -109,41 +110,48 @@ class _AuthRegisterClientScreenState extends ConsumerState<AuthRegisterClientScr
             ),
             const SizedBox(height: 6),
             Text(
-              'Photo de profil (optionnelle — sinon initiales par défaut)',
+              S.profilePhotoOptional,
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 12, color: AppColors.muted.withValues(alpha: 0.95)),
             ),
             const SizedBox(height: 16),
             TextField(
               controller: _first,
-              decoration: const InputDecoration(
-                labelText: 'Prénom *',
+              decoration: InputDecoration(
+                labelText: '${S.fieldFirstName} *',
               ),
             ),
             FormSpacing.betweenInputs,
             TextField(
               controller: _last,
-              decoration: const InputDecoration(
-                labelText: 'Nom *',
+              decoration: InputDecoration(
+                labelText: '${S.fieldLastName} *',
               ),
             ),
             FormSpacing.betweenInputs,
-            TextField(controller: _email, decoration: const InputDecoration(labelText: 'Email')),
+            TextField(
+              controller: _email,
+              decoration: const InputDecoration(labelText: S.emailLabel),
+            ),
             FormSpacing.betweenInputs,
-            TextField(controller: _password, obscureText: true, decoration: const InputDecoration(labelText: 'Mot de passe (min 6)')),
+            TextField(
+              controller: _password,
+              obscureText: true,
+              decoration: const InputDecoration(labelText: S.fieldPasswordMin),
+            ),
             FormSpacing.betweenInputs,
             TextField(
               controller: _phone,
               keyboardType: TextInputType.phone,
-              decoration: const InputDecoration(
-                labelText: 'Téléphone *',
-                hintText: 'Ex. +212600000000',
+              decoration: InputDecoration(
+                labelText: '${S.fieldPhoneRequired} *',
+                hintText: '+212600000000',
               ),
             ),
             CheckboxListTile(
               value: mediouna,
               onChanged: (v) => setState(() => mediouna = v ?? false),
-              title: const Text('Je confirme habiter à Mediouna'),
+              title: const Text(S.mediounaConfirmLabel),
               activeColor: AppColors.deepBlue,
             ),
             const SizedBox(height: 16),
@@ -151,7 +159,7 @@ class _AuthRegisterClientScreenState extends ConsumerState<AuthRegisterClientScr
               onPressed: loading ? null : _submit,
               child: loading
                   ? const SizedBox(height: 22, width: 22, child: CircularProgressIndicator(strokeWidth: 2))
-                  : const Text("S'inscrire"),
+                  : const Text(S.registerSubmit),
             ),
           ],
         ),

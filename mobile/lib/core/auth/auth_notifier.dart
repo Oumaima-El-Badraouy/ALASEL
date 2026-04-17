@@ -92,6 +92,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
     required String password,
     required bool isMediounaVerified,
     String? photoUrl,
+    required String cinRectoUrl,
+    required String cinVersoUrl,
   }) async {
     final dio = Dio(BaseOptions(baseUrl: ApiConfig.baseUrl, headers: {'Content-Type': 'application/json'}));
     final res = await dio.post('/auth/register', data: {
@@ -104,6 +106,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
       'password': password,
       'isMediounaVerified': isMediounaVerified,
       if (photoUrl != null && photoUrl.trim().isNotEmpty) 'photoUrl': photoUrl.trim(),
+      'cinRectoUrl': cinRectoUrl.trim(),
+      'cinVersoUrl': cinVersoUrl.trim(),
     });
     final data = res.data as Map<String, dynamic>;
     final token = data['token'] as String;

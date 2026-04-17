@@ -3,8 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/auth/auth_notifier.dart';
+import '../../core/l10n/strings.dart';
 import '../../core/theme/app_colors.dart';
 import '../widgets/moroccan_pattern_background.dart';
 import '../widgets/moroccan_ui_kit.dart';
@@ -19,23 +21,30 @@ class SplashScreen extends ConsumerStatefulWidget {
 class _SplashScreenState extends ConsumerState<SplashScreen> {
   bool _scheduled = false;
 
+  Future<void> _navigateAfterSplash() async {
+    final prefs = await SharedPreferences.getInstance();
+    final longDone = prefs.getBool('splash_long_shown') ?? false;
+    final ms = longDone ? 1400 : 8000;
+    await Future.delayed(Duration(milliseconds: ms));
+    if (!longDone) await prefs.setBool('splash_long_shown', true);
+    if (!mounted) return;
+    final a = ref.read(authNotifierProvider);
+    if (!a.isAuthenticated) {
+      context.go('/auth/login');
+    } else if (a.user?.role == 'client') {
+      context.go('/client');
+    } else {
+      context.go('/artisan');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final auth = ref.watch(authNotifierProvider);
 
     if (auth.ready && !_scheduled) {
       _scheduled = true;
-      Future<void>.delayed(const Duration(milliseconds: 1400), () {
-        if (!context.mounted) return;
-        final a = ref.read(authNotifierProvider);
-        if (!a.isAuthenticated) {
-          context.go('/auth/login');
-        } else if (a.user?.role == 'client') {
-          context.go('/client');
-        } else {
-          context.go('/artisan');
-        }
-      });
+      _navigateAfterSplash();
     }
 
     return Scaffold(
@@ -79,7 +88,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                 const MoroccanGoldBand(width: 160),
                 const SizedBox(height: 20),
                 Text(
-                  'AL ASEL',
+                  S.appName,
                   style: GoogleFonts.elMessiri(
                     fontSize: 34,
                     fontWeight: FontWeight.w800,
@@ -90,7 +99,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                 ),
                 const SizedBox(height: 10),
                 Text(
-                  'الأصل',
+                  S.arabicSubtitle,
                   style: GoogleFonts.elMessiri(
                     fontSize: 22,
                     fontWeight: FontWeight.w600,
@@ -101,7 +110,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Artisans de confiance — Mediouna d’abord',
+                  S.welcomeMediouna,
                   textAlign: TextAlign.center,
                   style: GoogleFonts.cairo(
                     fontSize: 15,

@@ -1,5 +1,7 @@
 import 'dotenv/config';
 import http from 'http';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -20,6 +22,10 @@ if (process.env.MEMORY_STORE !== '1') {
 
 const app = express();
 const server = http.createServer(app);
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const uploadsRoot = path.join(__dirname, '..', 'uploads');
+app.use('/uploads', express.static(uploadsRoot));
 const io = new Server(server, {
   cors: { origin: process.env.CORS_ORIGIN?.split(',') || '*' },
 });
@@ -27,7 +33,7 @@ setIo(io);
 
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(cors({ origin: true, credentials: true }));
-app.use(express.json({ limit: '15mb' }));
+app.use(express.json({ limit: '50mb' }));
 
 app.use('/api/v1', v1);
 
@@ -51,13 +57,11 @@ io.on('connection', (socket) => {
 
 const PORT = Number(process.env.PORT) || 4000;
 
-if (process.env.NODE_ENV !== "production") {
-  server.listen(PORT, async () => {
-    loadMemorySnapshot();
-    await seedDemoIfEnabled();
-    console.log(`AL ASEL API listening on :${PORT} (memory=${process.env.MEMORY_STORE === '1'})`);
-  });
-}
+server.listen(PORT, async () => {
+  loadMemorySnapshot();
+  await seedDemoIfEnabled();
+  console.log(`AL ASEL API listening on :${PORT} (memory=${process.env.MEMORY_STORE === '1'})`);
+});
 
 export default server;
 

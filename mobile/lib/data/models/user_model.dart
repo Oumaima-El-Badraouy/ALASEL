@@ -16,6 +16,9 @@ class UserModel {
     this.displayName,
     this.popularityScore,
     this.favoritePostIds = const [],
+    this.emailVerified,
+    this.cinRectoUrl,
+    this.cinVersoUrl,
   });
 
   final String id;
@@ -33,6 +36,9 @@ class UserModel {
   final String? displayName;
   final int? popularityScore;
   final List<String> favoritePostIds;
+  final bool? emailVerified;
+  final String? cinRectoUrl;
+  final String? cinVersoUrl;
 
   String get display => name ?? displayName ?? '${firstName ?? ''} ${lastName ?? ''}'.trim();
 
@@ -53,6 +59,9 @@ class UserModel {
       displayName: j['displayName'] as String?,
       popularityScore: (j['popularityScore'] as num?)?.toInt(),
       favoritePostIds: (j['favoritePostIds'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? const [],
+      emailVerified: j['emailVerified'] as bool?,
+      cinRectoUrl: j['cinRectoUrl'] as String?,
+      cinVersoUrl: j['cinVersoUrl'] as String?,
     );
   }
 }

@@ -9,6 +9,8 @@ import '../presentation/screens/chat_screen.dart';
 import '../presentation/screens/client_shell_screen.dart';
 import '../presentation/screens/inbox_screen.dart';
 import '../presentation/screens/create_post_screen.dart';
+import '../presentation/screens/email_verification_screen.dart';
+import '../presentation/screens/report_problem_screen.dart';
 import '../presentation/screens/splash_screen.dart';
 
 final appRouter = GoRouter(
@@ -21,6 +23,8 @@ final appRouter = GoRouter(
     GoRoute(path: '/client', builder: (context, state) => const ClientShellScreen()),
     GoRoute(path: '/artisan', builder: (context, state) => const ArtisanShellScreen()),
     GoRoute(path: '/inbox', builder: (context, state) => const InboxScreen()),
+    GoRoute(path: '/report', builder: (context, state) => const ReportProblemScreen()),
+    GoRoute(path: '/verify-email', builder: (context, state) => const EmailVerificationScreen()),
     GoRoute(
       path: '/create-post',
       builder: (context, state) {

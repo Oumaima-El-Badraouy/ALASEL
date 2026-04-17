@@ -1,15 +1,14 @@
-import 'dart:convert';
-
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/auth/auth_notifier.dart';
+import '../../core/l10n/strings.dart';
 import '../../core/theme/app_colors.dart';
 import '../../data/models/post_model.dart';
 import '../providers/app_providers.dart';
 import 'author_avatar.dart';
+import 'post_media_preview.dart';
 import 'post_comments_sheet.dart';
 import 'post_likers_sheet.dart';
 
@@ -58,9 +57,6 @@ class _ClientFeedPostCardState extends ConsumerState<ClientFeedPostCard> {
     _liked = widget.post.likedByMe;
   }
 
-  bool _net(String? m) => m != null && (m.startsWith('http://') || m.startsWith('https://'));
-  bool _dataImg(String? m) => m != null && m.startsWith('data:image');
-
   Future<void> _toggleFavorite() async {
     final me = ref.read(authNotifierProvider).user;
     if (me == null) return;
@@ -100,7 +96,7 @@ class _ClientFeedPostCardState extends ConsumerState<ClientFeedPostCard> {
     final me = ref.read(authNotifierProvider).user;
     if (me == null || (me.role != 'client' && me.role != 'artisan')) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Connectez-vous en tant que client ou artisan pour commenter.')),
+        const SnackBar(content: Text(S.loginToComment)),
       );
       return;
     }
@@ -117,6 +113,9 @@ class _ClientFeedPostCardState extends ConsumerState<ClientFeedPostCard> {
           }
         },
         onEngagementChanged: widget.onEngagementChanged,
+        onFollowToggled: (artisanId) {
+          ref.invalidate(artisanFollowStatusProvider(artisanId));
+        },
       ),
     );
   }
@@ -131,7 +130,7 @@ class _ClientFeedPostCardState extends ConsumerState<ClientFeedPostCard> {
   }
 
   void _openChat() {
-    final label = widget.post.authorDisplayName ?? 'Artisan';
+    final label = widget.post.authorDisplayName ?? S.fallbackArtisan;
     final loc = Uri(
       path: '/chat/${widget.post.userId}',
       queryParameters: {'name': label},
@@ -146,7 +145,7 @@ class _ClientFeedPostCardState extends ConsumerState<ClientFeedPostCard> {
     final canEngage = me != null && (me.role == 'client' || me.role == 'artisan');
     final isMine = me?.id == widget.post.userId;
     final isFav = me?.favoritePostIds.contains(widget.post.id) ?? false;
-    final author = widget.post.authorDisplayName ?? 'Artisan';
+    final author = widget.post.authorDisplayName ?? S.fallbackArtisan;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -203,7 +202,7 @@ class _ClientFeedPostCardState extends ConsumerState<ClientFeedPostCard> {
                                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                               ),
                               child: const Text(
-                                'Abonné',
+                                S.following,
                                 style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
                               ),
                             )
@@ -217,7 +216,7 @@ class _ClientFeedPostCardState extends ConsumerState<ClientFeedPostCard> {
                                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                               ),
                               child: const Text(
-                                'Suivre',
+                                S.followButton,
                                 style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
                               ),
                             ),
@@ -235,20 +234,7 @@ class _ClientFeedPostCardState extends ConsumerState<ClientFeedPostCard> {
             ),
           ),
           if (widget.post.media != null && widget.post.media!.isNotEmpty)
-            AspectRatio(
-              aspectRatio: 1,
-              child: _net(widget.post.media)
-                  ? CachedNetworkImage(imageUrl: widget.post.media!, fit: BoxFit.cover)
-                  : _dataImg(widget.post.media)
-                      ? Image.memory(
-                          base64Decode(widget.post.media!.split(',').last),
-                          fit: BoxFit.cover,
-                        )
-                      : ColoredBox(
-                          color: AppColors.sandDeep,
-                          child: Icon(Icons.play_circle_outline, size: 56, color: AppColors.muted.withValues(alpha: 0.5)),
-                        ),
-            ),
+            PostMediaPreview(media: widget.post.media!, aspectRatio: 1),
           Padding(
             padding: const EdgeInsets.fromLTRB(4, 6, 8, 4),
             child: LayoutBuilder(
@@ -300,7 +286,7 @@ class _ClientFeedPostCardState extends ConsumerState<ClientFeedPostCard> {
                       ),
                     if (canEngage)
                       Tooltip(
-                        message: 'Commentaires publics sur ce post',
+                        message: S.publicCommentsOnPost,
                         child: InkWell(
                           onTap: _openComments,
                           borderRadius: BorderRadius.circular(20),
@@ -322,7 +308,7 @@ class _ClientFeedPostCardState extends ConsumerState<ClientFeedPostCard> {
                       ),
                     if (isClient)
                       IconButton(
-                        tooltip: isFav ? 'Retirer des favoris' : 'Favori',
+                        tooltip: isFav ? S.tooltipRemoveFavorite : S.tooltipAddFavorite,
                         onPressed: isMine ? null : _toggleFavorite,
                         icon: Icon(
                           isFav ? Icons.bookmark : Icons.bookmark_border,
@@ -332,7 +318,7 @@ class _ClientFeedPostCardState extends ConsumerState<ClientFeedPostCard> {
                         padding: EdgeInsets.zero,
                       ),
                     IconButton(
-                      tooltip: 'Message privé à l’artisan',
+                      tooltip: S.tooltipPrivateMessageArtisan,
                       onPressed: isMine ? null : _openChat,
                       icon: const Icon(Icons.send_rounded),
                       constraints: const BoxConstraints(minWidth: 40, minHeight: 40),

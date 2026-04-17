@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../core/auth/auth_notifier.dart';
+import '../../core/l10n/strings.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/form_spacing.dart';
 import '../widgets/moroccan_pattern_background.dart';
@@ -27,6 +28,8 @@ class _AuthRegisterArtisanScreenState extends ConsumerState<AuthRegisterArtisanS
   bool mediouna = false;
   bool loading = false;
   String? _photoDataUrl;
+  String? _cinRectoDataUrl;
+  String? _cinVersoDataUrl;
 
   @override
   void dispose() {
@@ -53,16 +56,50 @@ class _AuthRegisterArtisanScreenState extends ConsumerState<AuthRegisterArtisanS
     });
   }
 
+  Future<void> _pickCin(bool recto) async {
+    final x = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 2000,
+      imageQuality: 82,
+    );
+    if (x == null) return;
+    final bytes = await x.readAsBytes();
+    if (bytes.length > 4 * 1024 * 1024) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text(S.imageTooLarge4mb)),
+        );
+      }
+      return;
+    }
+    final b64 = base64Encode(bytes);
+    final dataUrl = 'data:image/jpeg;base64,$b64';
+    if (!mounted) return;
+    setState(() {
+      if (recto) {
+        _cinRectoDataUrl = dataUrl;
+      } else {
+        _cinVersoDataUrl = dataUrl;
+      }
+    });
+  }
+
   Future<void> _submit() async {
     if (!mediouna) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Confirmez que vous habitez à Mediouna — obligatoire.')),
+        const SnackBar(content: Text(S.errMediounaRequired)),
       );
       return;
     }
     if (_desc.text.trim().length < 10) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Profil artisan : décrivez votre activité (au moins 10 caractères).')),
+        const SnackBar(content: Text(S.errDescMin10)),
+      );
+      return;
+    }
+    if (_cinRectoDataUrl == null || _cinVersoDataUrl == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text(S.errCinBothRequired)),
       );
       return;
     }
@@ -77,6 +114,8 @@ class _AuthRegisterArtisanScreenState extends ConsumerState<AuthRegisterArtisanS
             password: _password.text,
             isMediounaVerified: true,
             photoUrl: _photoDataUrl,
+            cinRectoUrl: _cinRectoDataUrl!,
+            cinVersoUrl: _cinVersoDataUrl!,
           );
       if (mounted) context.go('/artisan');
     } catch (e) {
@@ -88,8 +127,10 @@ class _AuthRegisterArtisanScreenState extends ConsumerState<AuthRegisterArtisanS
 
   @override
   Widget build(BuildContext context) {
+    final hasR = _cinRectoDataUrl != null && _cinRectoDataUrl!.isNotEmpty;
+    final hasV = _cinVersoDataUrl != null && _cinVersoDataUrl!.isNotEmpty;
     return Scaffold(
-      appBar: AppBar(title: const Text('Inscription artisan')),
+      appBar: AppBar(title: const Text(S.registerArtisanTitle)),
       body: MoroccanPatternBackground(
         child: ListView(
           padding: const EdgeInsets.all(20),
@@ -109,32 +150,74 @@ class _AuthRegisterArtisanScreenState extends ConsumerState<AuthRegisterArtisanS
             ),
             const SizedBox(height: 6),
             Text(
-              'Photo de profil (recommandée)',
+              S.profilePhotoRecommended,
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 12, color: AppColors.muted.withValues(alpha: 0.95)),
             ),
             const SizedBox(height: 16),
-            TextField(controller: _name, decoration: const InputDecoration(labelText: 'Nom complet (obligatoire)')),
+            TextField(
+              controller: _name,
+              decoration: const InputDecoration(labelText: S.fieldFullNameRequired),
+            ),
             FormSpacing.betweenInputs,
-            TextField(controller: _domain, decoration: const InputDecoration(labelText: 'Domaine (plombier, peintre…)')),
+            TextField(
+              controller: _domain,
+              decoration: const InputDecoration(labelText: S.fieldDomainHint),
+            ),
             FormSpacing.betweenInputs,
             TextField(
               controller: _desc,
               maxLines: 4,
               decoration: const InputDecoration(
-                labelText: 'Description du profil (obligatoire, min. 10 caractères)',
+                labelText: S.fieldDescriptionArtisanRequired,
               ),
             ),
             FormSpacing.betweenInputs,
-            TextField(controller: _phone, keyboardType: TextInputType.phone, decoration: const InputDecoration(labelText: 'Téléphone (obligatoire)')),
+            TextField(
+              controller: _phone,
+              keyboardType: TextInputType.phone,
+              decoration: const InputDecoration(labelText: S.fieldPhoneRequired),
+            ),
             FormSpacing.betweenInputs,
-            TextField(controller: _email, decoration: const InputDecoration(labelText: 'Email')),
+            TextField(
+              controller: _email,
+              decoration: const InputDecoration(labelText: S.emailLabel),
+            ),
             FormSpacing.betweenInputs,
-            TextField(controller: _password, obscureText: true, decoration: const InputDecoration(labelText: 'Mot de passe (min 6)')),
+            TextField(
+              controller: _password,
+              obscureText: true,
+              decoration: const InputDecoration(labelText: S.fieldPasswordMin),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              S.cinRegisterSectionTitle,
+              style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => _pickCin(true),
+                    icon: Icon(hasR ? Icons.check_circle_outline : Icons.upload_outlined),
+                    label: const Text(S.cinRecto),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () => _pickCin(false),
+                    icon: Icon(hasV ? Icons.check_circle_outline : Icons.upload_outlined),
+                    label: const Text(S.cinVerso),
+                  ),
+                ),
+              ],
+            ),
             CheckboxListTile(
               value: mediouna,
               onChanged: (v) => setState(() => mediouna = v ?? false),
-              title: const Text('Je confirme habiter à Mediouna'),
+              title: const Text(S.mediounaConfirmLabel),
               activeColor: AppColors.deepBlue,
             ),
             const SizedBox(height: 16),
@@ -142,7 +225,7 @@ class _AuthRegisterArtisanScreenState extends ConsumerState<AuthRegisterArtisanS
               onPressed: loading ? null : _submit,
               child: loading
                   ? const SizedBox(height: 22, width: 22, child: CircularProgressIndicator(strokeWidth: 2))
-                  : const Text("S'inscrire"),
+                  : const Text(S.registerSubmit),
             ),
           ],
         ),

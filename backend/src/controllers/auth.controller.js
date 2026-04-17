@@ -110,6 +110,19 @@ export async function register(req, res) {
         body.photoUrl != null && String(body.photoUrl).trim()
           ? String(body.photoUrl).trim()
           : null;
+      const cinRectoUrl =
+        body.cinRectoUrl != null && String(body.cinRectoUrl).trim()
+          ? String(body.cinRectoUrl).trim()
+          : null;
+      const cinVersoUrl =
+        body.cinVersoUrl != null && String(body.cinVersoUrl).trim()
+          ? String(body.cinVersoUrl).trim()
+          : null;
+      if (!cinRectoUrl || !cinVersoUrl) {
+        return res.status(400).json({
+          error: 'Artisan registration requires cinRectoUrl and cinVersoUrl (national ID photos).',
+        });
+      }
       userDoc = {
         id,
         role: 'artisan',
@@ -121,6 +134,8 @@ export async function register(req, res) {
         domain,
         description,
         photoUrl,
+        cinRectoUrl,
+        cinVersoUrl,
         isMediounaVerified: true,
         city: 'Mediouna',
         passwordHash,

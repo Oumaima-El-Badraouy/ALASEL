@@ -1,4 +1,5 @@
 import * as db from '../db/index.js';
+import { emitUserInboxPing } from '../realtime.js';
 import { attachSocialCounts } from './postEngagement.controller.js';
 
 const LEGACY = {
@@ -51,6 +52,23 @@ export async function createPost(req, res) {
       createdAt: new Date().toISOString(),
     });
     const saved = await db.docGet('posts', id);
+    try {
+      const allUsers = await db.queryAll('users', 500);
+      /* Notifications temps réel (Socket.IO) : uniquement les artisans — nouvelle demande client dans la zone. */
+      if (type === 'client_request') {
+        for (const u of allUsers) {
+          if (u.role === 'artisan' && u.id !== req.user.uid) {
+            emitUserInboxPing(u.id, {
+              type: 'new_demand',
+              postId: id,
+              preview: content.slice(0, 120),
+            });
+          }
+        }
+      }
+    } catch (_) {
+      /* notifications best-effort */
+    }
     return res.status(201).json(saved);
   } catch (e) {
     return res.status(500).json({ error: e.message });
