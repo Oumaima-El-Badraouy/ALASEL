@@ -25,7 +25,16 @@ const server = http.createServer(app);
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const uploadsRoot = path.join(__dirname, '..', 'uploads');
-app.use('/uploads', express.static(uploadsRoot));
+app.use('/uploads', (req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
+  res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+  if (req.method === 'OPTIONS') {
+    res.sendStatus(204);
+    return;
+  }
+  next();
+}, express.static(uploadsRoot));
 const io = new Server(server, {
   cors: { origin: process.env.CORS_ORIGIN?.split(',') || '*' },
 });
@@ -57,10 +66,10 @@ io.on('connection', (socket) => {
 
 const PORT = Number(process.env.PORT) || 4000;
 
-server.listen(PORT, async () => {
+server.listen(PORT, '0.0.0.0', async () => {
   loadMemorySnapshot();
   await seedDemoIfEnabled();
-  console.log(`AL ASEL API listening on :${PORT} (memory=${process.env.MEMORY_STORE === '1'})`);
+  console.log(`AL ASEL API listening on 0.0.0.0:${PORT} (memory=${process.env.MEMORY_STORE === '1'})`);
 });
 
 export default server;

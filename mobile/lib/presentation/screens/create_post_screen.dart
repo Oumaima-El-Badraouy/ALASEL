@@ -11,6 +11,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/form_spacing.dart';
 import '../providers/app_providers.dart';
 import '../widgets/moroccan_pattern_background.dart';
+import '../widgets/post_media_preview.dart';
 
 class CreatePostScreen extends ConsumerStatefulWidget {
   const CreatePostScreen({super.key, required this.postType});
@@ -64,7 +65,10 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
     }
     setState(() => _videoUploading = true);
     try {
-      final url = await ref.read(marketplaceRepositoryProvider).uploadPostVideo(file);
+      final url = await ref.read(marketplaceRepositoryProvider).uploadPostVideo(
+            file,
+            filename: x.name,
+          );
       if (!mounted) return;
       setState(() => _mediaDataUrl = url);
     } catch (e) {
@@ -145,10 +149,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
             if (_mediaDataUrl != null)
               Padding(
                 padding: const EdgeInsets.only(top: 12),
-                child: Text(
-                  _mediaDataUrl!.length > 80 ? '${_mediaDataUrl!.substring(0, 80)}…' : _mediaDataUrl!,
-                  style: const TextStyle(fontSize: 11, color: AppColors.muted),
-                ),
+                child: PostMediaPreview(media: _mediaDataUrl!, aspectRatio: 16 / 9),
               ),
             const SizedBox(height: 20),
             FilledButton(
