@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 
 import '../models/artisan_model.dart';
+import '../models/artisan_public_detail.dart';
 import '../models/post_comment_model.dart';
 import '../models/post_model.dart';
 import '../models/service_request_model.dart';
@@ -232,6 +233,11 @@ class MarketplaceRepository {
   Future<ArtisanModel> getArtisan(String id) async {
     final res = await _dio.get('/artisans/$id');
     return ArtisanModel.fromJson(res.data as Map<String, dynamic>);
+  }
+
+  Future<ArtisanPublicDetail> getArtisanFull(String id) async {
+    final res = await _dio.get('/artisans/$id/full');
+    return ArtisanPublicDetail.fromJson(res.data as Map<String, dynamic>);
   }
 
   Future<Map<String, dynamic>> estimate({

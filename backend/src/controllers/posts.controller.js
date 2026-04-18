@@ -1,4 +1,5 @@
 import * as db from '../db/index.js';
+import { isValidMoroccanTrade } from '../constants/moroccanTrades.js';
 import { emitUserInboxPing } from '../realtime.js';
 import { attachSocialCounts } from './postEngagement.controller.js';
 
@@ -38,6 +39,11 @@ export async function createPost(req, res) {
     }
     const media = body.media != null ? String(body.media) : body.mediaUrl != null ? String(body.mediaUrl) : '';
     const category = String(body.category || '').trim();
+    if (!isValidMoroccanTrade(category)) {
+      return res.status(400).json({
+        error: 'category must be a valid traditional Moroccan craft (see API trades list).',
+      });
+    }
 
     const id = await db.addDoc('posts', {
       userId: req.user.uid,
@@ -80,7 +86,7 @@ async function authorPopularity(authorId) {
   return (u && u.popularityScore) || 0;
 }
 
-async function withAuthorDisplayName(p) {
+export async function withAuthorDisplayName(p) {
   const uid = p.userId || p.authorId;
   if (!uid) return { ...p, authorDisplayName: 'Artisan', authorPhotoUrl: null };
   const u = await db.docGet('users', uid);

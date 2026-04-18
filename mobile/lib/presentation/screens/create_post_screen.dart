@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../core/constants/moroccan_trades.dart';
 import '../../core/l10n/strings.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/form_spacing.dart';
@@ -25,7 +26,7 @@ class CreatePostScreen extends ConsumerStatefulWidget {
 
 class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
   final _content = TextEditingController();
-  final _cat = TextEditingController();
+  String _categoryId = moroccanTrades.first.id;
   String? _mediaDataUrl;
   bool loading = false;
   bool _videoUploading = false;
@@ -36,7 +37,6 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
   @override
   void dispose() {
     _content.dispose();
-    _cat.dispose();
     super.dispose();
   }
 
@@ -88,7 +88,7 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
       await ref.read(marketplaceRepositoryProvider).createPost(
             type: apiType,
             content: _content.text.trim(),
-            category: _cat.text.trim(),
+            category: _categoryId,
             media: _mediaDataUrl,
           );
       if (!mounted) return;
@@ -127,7 +127,15 @@ class _CreatePostScreenState extends ConsumerState<CreatePostScreen> {
               decoration: const InputDecoration(labelText: S.fieldDescription),
             ),
             FormSpacing.betweenInputs,
-            TextField(controller: _cat, decoration: const InputDecoration(labelText: S.fieldDomainCategory)),
+            DropdownButtonFormField<String>(
+              value: _categoryId,
+              decoration: const InputDecoration(labelText: S.fieldDomainCategory),
+              items: [
+                for (final t in moroccanTrades)
+                  DropdownMenuItem(value: t.id, child: Text(t.labelAr)),
+              ],
+              onChanged: (v) => setState(() => _categoryId = v ?? moroccanTrades.first.id),
+            ),
             const SizedBox(height: 12),
             Row(
               children: [

@@ -29,6 +29,7 @@ class S {
 
   // Client nav
   static const String navHome = 'الرئيسية';
+  static const String navArtisans = 'الحرفيون';
   static const String navFavorites = 'المفضلة';
   static const String navProfile = 'الملف';
 
@@ -61,6 +62,38 @@ class S {
         return 'بلاط';
       case 'hvac':
         return 'تكييف';
+      case 'zellige':
+        return 'الزليج';
+      case 'pottery':
+        return 'الفخار';
+      case 'leather':
+        return 'الجلد';
+      case 'dinanderie':
+        return 'الدندانة';
+      case 'wood_traditional':
+        return 'النجارة التقليدية';
+      case 'carpet_weaving':
+        return 'السجاد';
+      case 'textile_fouta':
+        return 'النسيج';
+      case 'henna':
+        return 'الحناء';
+      case 'plaster_gebs':
+        return 'الجص والزخرفة';
+      case 'basketry':
+        return 'الحصر';
+      case 'embroidery':
+        return 'التطريز';
+      case 'calligraphy':
+        return 'الخط';
+      case 'argan_cosmetics':
+        return 'الأرغان';
+      case 'traditional_food':
+        return 'مأكولات تقليدية';
+      case 'jewelry_berber':
+        return 'الحلي';
+      case 'wrought_iron':
+        return 'الحدادة التقليدية';
       default:
         return key;
     }
@@ -82,6 +115,7 @@ class S {
   static const String loginSubtitle = 'أدخل بياناتك للوصول إلى حسابك';
   static const String emailLabel = 'البريد الإلكتروني';
   static const String passwordLabel = 'كلمة المرور';
+  static const String rememberLogin = 'حفظ بيانات الدخول';
   static const String loginButton = 'دخول';
   static const String registerClient = 'إنشاء حساب زبون';
   static const String registerArtisan = 'إنشاء حساب حرفي';
@@ -108,6 +142,7 @@ class S {
   static const String profilePhotoOptional = 'صورة الملف (اختياري — أو الأحرف الأولى)';
   static const String fieldFullNameRequired = 'الاسم الكامل (إلزامي)';
   static const String fieldDomainHint = 'المجال (سباكة، دهان…)';
+  static const String fieldTraditionalTrade = 'المهنة التقليدية (المغرب)';
   static const String fieldDescriptionArtisanRequired = 'وصف النشاط (إلزامي، 10 أحرف على الأقل)';
   static const String fieldPhoneRequired = 'الهاتف (إلزامي)';
   static const String fieldPasswordMin = 'كلمة المرور (6 أحرف على الأقل)';
@@ -242,6 +277,10 @@ class S {
   static const String trustWord = 'ثقة';
   static const String portfolioSection = 'معرض الأعمال — قبل / بعد';
   static const String noPortfolioYet = 'لا صور بعد.';
+  static const String statServicePosts = 'منشورات الخدمة';
+  static const String statDemandsInTrade = 'طلبات في المهنة';
+  static const String artisanPostsSection = 'منشورات الخدمة';
+  static const String artisanContactSection = 'للتواصل';
 
   // Fil client (carte)
   static const String publicCommentsOnPost = 'تعليقات عامة على هذا المنشور';

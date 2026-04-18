@@ -1,4 +1,6 @@
 import * as db from '../db/index.js';
+import { withAuthorDisplayName } from './posts.controller.js';
+import { attachSocialCounts } from './postEngagement.controller.js';
 import { computeTrustScore } from '../services/trustScore.service.js';
 import { rankArtisans } from '../services/matching.service.js';
 
@@ -36,7 +38,9 @@ export async function listArtisans(req, res) {
     if (available === 'true') {
       rows = rows.filter((a) => a.available !== false);
     }
-    rows = rows.map(enrichProfile).sort((a, b) => b.trustScore - a.trustScore);
+    rows = rows
+      .map((a) => enrichProfile({ ...a, id: a.id || a.userId }))
+      .sort((a, b) => b.trustScore - a.trustScore);
     return res.json({ items: rows });
   } catch (e) {
     return res.status(500).json({ error: e.message });
@@ -50,6 +54,80 @@ export async function getArtisan(req, res) {
       return res.status(404).json({ error: 'Artisan not found' });
     }
     return res.json(enrichProfile(row));
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
+}
+
+/** GET /artisans/:id/full — profil public : utilisateur, stats, publications service */
+export async function getArtisanFull(req, res) {
+  try {
+    const id = req.params.id;
+    const profileRaw = await db.docGet('artisanProfiles', id);
+    if (!profileRaw || profileRaw.public === false) {
+      return res.status(404).json({ error: 'Artisan not found' });
+    }
+    const profile = { ...profileRaw, id: profileRaw.id || id, userId: profileRaw.userId || id };
+    const user = await db.docGet('users', id);
+    const cats = new Set(profile.categories || []);
+
+    const allPosts = (await db.queryAll('posts', 500)).filter((p) => !p.deleted);
+    const servicePosts = [];
+    let demandsInTradeCount = 0;
+
+    for (const p of allPosts) {
+      const author = p.userId || p.authorId;
+      const rawT = p.type || '';
+      const eff =
+        rawT ||
+        (p.postType === 'service' ? 'artisan_service' : p.postType === 'demand' ? 'client_request' : '');
+      if (author === id && eff === 'artisan_service') {
+        servicePosts.push(p);
+      }
+      if (eff === 'client_request' && p.category && cats.has(String(p.category))) {
+        demandsInTradeCount += 1;
+      }
+    }
+
+    servicePosts.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+    const withAuthors = await Promise.all(servicePosts.map((p) => withAuthorDisplayName(p)));
+    const uid = req.user?.uid || null;
+    const [allLikes, allComments] = await Promise.all([
+      db.queryAll('post_likes', 5000),
+      db.queryAll('post_comments', 5000),
+    ]);
+    const postsOut = attachSocialCounts(withAuthors, uid, allLikes, allComments);
+
+    const name = user?.name || profile.displayName || '';
+    let firstName = user?.firstName ?? null;
+    let lastName = user?.lastName ?? null;
+    if ((!firstName || !lastName) && name) {
+      const parts = String(name).trim().split(/\s+/);
+      if (parts.length >= 2) {
+        firstName = firstName || parts[0];
+        lastName = lastName || parts.slice(1).join(' ');
+      } else if (parts.length === 1) {
+        firstName = firstName || parts[0];
+      }
+    }
+
+    return res.json({
+      profile: enrichProfile(profile),
+      user: {
+        name,
+        firstName,
+        lastName,
+        phone: user?.phone ?? '',
+        photoUrl: user?.photoUrl ?? null,
+        description: user?.description ?? profile.bio ?? '',
+        domain: user?.domain ?? '',
+      },
+      stats: {
+        servicePostsCount: postsOut.length,
+        demandsInTradeCount,
+      },
+      posts: postsOut,
+    });
   } catch (e) {
     return res.status(500).json({ error: e.message });
   }

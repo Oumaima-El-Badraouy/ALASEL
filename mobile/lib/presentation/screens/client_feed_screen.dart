@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/constants/moroccan_trades.dart';
 import '../../core/l10n/strings.dart';
 import '../../core/theme/app_colors.dart';
 import '../../data/models/post_model.dart';
@@ -38,7 +39,7 @@ class _ClientFeedScreenState extends ConsumerState<ClientFeedScreen> {
   final _searchCtrl = TextEditingController();
   Timer? _debounce;
 
-  static const cats = ['', 'plumbing', 'painting', 'carpentry', 'electricity', 'tiling', 'hvac'];
+  static List<String> get _cats => ['', ...moroccanTradeIds];
 
   String get _providerKey => '$catKey|$sortMode|$_searchQuery';
 
@@ -130,7 +131,7 @@ class _ClientFeedScreenState extends ConsumerState<ClientFeedScreen> {
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   children: [
-                    for (final c in cats)
+                    for (final c in _cats)
                       Padding(
                         padding: const EdgeInsets.only(left: 8),
                         child: FilterChip(

@@ -12,24 +12,41 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   static const _key = 'al_asel_jwt';
+  static const _keyRemember = 'al_asel_remember_login';
+  static const _keySavedEmail = 'al_asel_saved_email';
+  static const _keySavedPassword = 'al_asel_saved_password';
 
   Future<void> hydrate() async {
     final prefs = await SharedPreferences.getInstance();
     final t = prefs.getString(_key);
-    if (t == null || t.isEmpty) {
-      state = const AuthState(ready: true);
-      return;
+    if (t != null && t.isNotEmpty) {
+      state = AuthState(token: t, ready: false);
+      try {
+        final dio = _dio(t);
+        final res = await dio.get('/users/me');
+        final u = UserModel.fromJson(res.data as Map<String, dynamic>);
+        state = AuthState(token: t, user: u, ready: true);
+        return;
+      } catch (_) {
+        await prefs.remove(_key);
+      }
     }
-    state = AuthState(token: t, ready: false);
-    try {
-      final dio = _dio(t);
-      final res = await dio.get('/users/me');
-      final u = UserModel.fromJson(res.data as Map<String, dynamic>);
-      state = AuthState(token: t, user: u, ready: true);
-    } catch (_) {
-      await prefs.remove(_key);
-      state = const AuthState(ready: true);
+    if (prefs.getBool(_keyRemember) == true) {
+      final email = prefs.getString(_keySavedEmail);
+      final password = prefs.getString(_keySavedPassword);
+      if (email != null &&
+          email.isNotEmpty &&
+          password != null &&
+          password.isNotEmpty) {
+        try {
+          await login(email, password, rememberMe: true);
+          return;
+        } catch (_) {
+          /* garder les champs sauvegardés pour saisie manuelle */
+        }
+      }
     }
+    state = const AuthState(ready: true);
   }
 
   Dio _dio(String token) {
@@ -44,7 +61,11 @@ class AuthNotifier extends StateNotifier<AuthState> {
     );
   }
 
-  Future<void> login(String email, String password) async {
+  Future<void> login(
+    String email,
+    String password, {
+    bool? rememberMe,
+  }) async {
     final dio = Dio(BaseOptions(baseUrl: ApiConfig.baseUrl, headers: {'Content-Type': 'application/json'}));
     final res = await dio.post('/auth/login', data: {'email': email.trim(), 'password': password});
     final data = res.data as Map<String, dynamic>;
@@ -52,6 +73,15 @@ class AuthNotifier extends StateNotifier<AuthState> {
     final user = UserModel.fromJson(data['user'] as Map<String, dynamic>);
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_key, token);
+    if (rememberMe == true) {
+      await prefs.setBool(_keyRemember, true);
+      await prefs.setString(_keySavedEmail, email.trim());
+      await prefs.setString(_keySavedPassword, password);
+    } else if (rememberMe == false) {
+      await prefs.remove(_keyRemember);
+      await prefs.remove(_keySavedEmail);
+      await prefs.remove(_keySavedPassword);
+    }
     state = AuthState(token: token, user: user, ready: true);
   }
 
@@ -120,6 +150,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_key);
+    await prefs.remove(_keyRemember);
+    await prefs.remove(_keySavedEmail);
+    await prefs.remove(_keySavedPassword);
     state = const AuthState(ready: true);
   }
 

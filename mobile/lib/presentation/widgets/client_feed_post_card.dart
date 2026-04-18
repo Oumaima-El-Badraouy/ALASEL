@@ -162,10 +162,16 @@ class _ClientFeedPostCardState extends ConsumerState<ClientFeedPostCard> {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                AuthorAvatar(
-                  radius: 18,
-                  photoUrl: widget.post.authorPhotoUrl,
-                  fallbackLabel: author,
+                InkWell(
+                  onTap: widget.post.userId.isEmpty
+                      ? null
+                      : () => context.push('/artisan-profile/${widget.post.userId}'),
+                  borderRadius: BorderRadius.circular(22),
+                  child: AuthorAvatar(
+                    radius: 18,
+                    photoUrl: widget.post.authorPhotoUrl,
+                    fallbackLabel: author,
+                  ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
@@ -181,7 +187,10 @@ class _ClientFeedPostCardState extends ConsumerState<ClientFeedPostCard> {
                       if (widget.post.category != null && widget.post.category!.isNotEmpty)
                         Padding(
                           padding: const EdgeInsets.only(top: 2),
-                          child: Text('#${widget.post.category}', style: const TextStyle(color: AppColors.muted, fontSize: 12)),
+                          child: Text(
+                            '#${S.categoryLabel(widget.post.category!)}',
+                            style: const TextStyle(color: AppColors.muted, fontSize: 12),
+                          ),
                         ),
                     ],
                   ),

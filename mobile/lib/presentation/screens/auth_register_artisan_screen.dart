@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../core/auth/auth_notifier.dart';
+import '../../core/constants/moroccan_trades.dart';
 import '../../core/l10n/strings.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/form_spacing.dart';
@@ -20,13 +21,13 @@ class AuthRegisterArtisanScreen extends ConsumerStatefulWidget {
 
 class _AuthRegisterArtisanScreenState extends ConsumerState<AuthRegisterArtisanScreen> {
   final _name = TextEditingController();
-  final _domain = TextEditingController();
   final _desc = TextEditingController();
   final _phone = TextEditingController();
   final _email = TextEditingController();
   final _password = TextEditingController();
   bool mediouna = false;
   bool loading = false;
+  String _tradeId = moroccanTrades.first.id;
   String? _photoDataUrl;
   String? _cinRectoDataUrl;
   String? _cinVersoDataUrl;
@@ -34,7 +35,6 @@ class _AuthRegisterArtisanScreenState extends ConsumerState<AuthRegisterArtisanS
   @override
   void dispose() {
     _name.dispose();
-    _domain.dispose();
     _desc.dispose();
     _phone.dispose();
     _email.dispose();
@@ -107,7 +107,7 @@ class _AuthRegisterArtisanScreenState extends ConsumerState<AuthRegisterArtisanS
     try {
       await ref.read(authNotifierProvider.notifier).registerArtisan(
             fullName: _name.text.trim(),
-            domain: _domain.text.trim(),
+            domain: _tradeId,
             description: _desc.text.trim(),
             phone: _phone.text.trim(),
             email: _email.text.trim(),
@@ -160,9 +160,14 @@ class _AuthRegisterArtisanScreenState extends ConsumerState<AuthRegisterArtisanS
               decoration: const InputDecoration(labelText: S.fieldFullNameRequired),
             ),
             FormSpacing.betweenInputs,
-            TextField(
-              controller: _domain,
-              decoration: const InputDecoration(labelText: S.fieldDomainHint),
+            DropdownButtonFormField<String>(
+              value: _tradeId,
+              decoration: const InputDecoration(labelText: S.fieldTraditionalTrade),
+              items: [
+                for (final t in moroccanTrades)
+                  DropdownMenuItem(value: t.id, child: Text(t.labelAr)),
+              ],
+              onChanged: (v) => setState(() => _tradeId = v ?? moroccanTrades.first.id),
             ),
             FormSpacing.betweenInputs,
             TextField(

@@ -58,6 +58,7 @@ r.get('/artisans/:artisanId/followers-count', follows.followersCount);
 r.get('/artisans', artisans.listArtisans);
 r.get('/artisans/match', artisans.matchArtisans);
 r.get('/artisans/:artisanId/reviews', reviews.listForArtisan);
+r.get('/artisans/:id/full', artisans.getArtisanFull);
 r.get('/artisans/:id', artisans.getArtisan);
 r.put('/artisans/profile', artisans.upsertProfile);
 r.post('/artisans/portfolio', artisans.addPortfolioItem);

@@ -9,6 +9,7 @@ import '../widgets/shell_messages_bar.dart';
 import 'client_favorites_screen.dart';
 import 'client_feed_screen.dart';
 import 'client_profile_screen.dart';
+import 'explore_screen.dart';
 
 class ClientShellScreen extends ConsumerStatefulWidget {
   const ClientShellScreen({super.key});
@@ -51,6 +52,7 @@ class _ClientShellScreenState extends ConsumerState<ClientShellScreen> {
                   index: tab,
                   children: const [
                     ClientFeedScreen(),
+                    ExploreScreen(),
                     ClientFavoritesScreen(),
                     ClientProfileScreen(),
                   ],
@@ -65,6 +67,11 @@ class _ClientShellScreenState extends ConsumerState<ClientShellScreen> {
         onDestinationSelected: (i) => setState(() => tab = i),
         destinations: const [
           NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: S.navHome),
+          NavigationDestination(
+            icon: Icon(Icons.groups_outlined),
+            selectedIcon: Icon(Icons.groups),
+            label: S.navArtisans,
+          ),
           NavigationDestination(
             icon: Icon(Icons.bookmark_border),
             selectedIcon: Icon(Icons.bookmark),

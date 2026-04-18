@@ -2,6 +2,7 @@ import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import * as db from '../db/index.js';
+import { isValidMoroccanTrade } from '../constants/moroccanTrades.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'al-asel-dev-change-me-in-production';
 const JWT_EXPIRES = process.env.JWT_EXPIRES || '30d';
@@ -106,6 +107,13 @@ export async function register(req, res) {
         .split(',')
         .map((s) => s.trim())
         .filter(Boolean);
+      for (const c of categories) {
+        if (!isValidMoroccanTrade(c)) {
+          return res.status(400).json({
+            error: 'domain must be one or more valid traditional Moroccan craft ids (from the registration list).',
+          });
+        }
+      }
       const photoUrl =
         body.photoUrl != null && String(body.photoUrl).trim()
           ? String(body.photoUrl).trim()

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/auth/auth_notifier.dart';
 import '../../core/l10n/strings.dart';
@@ -23,6 +25,25 @@ class _AuthLoginScreenState extends ConsumerState<AuthLoginScreen> {
   final _password = TextEditingController();
   bool loading = false;
   String? err;
+  bool _rememberMe = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRemembered();
+  }
+
+  Future<void> _loadRemembered() async {
+    final p = await SharedPreferences.getInstance();
+    if (!mounted) return;
+    if (p.getBool('al_asel_remember_login') == true) {
+      setState(() {
+        _rememberMe = true;
+        _email.text = p.getString('al_asel_saved_email') ?? '';
+        _password.text = p.getString('al_asel_saved_password') ?? '';
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -48,7 +69,11 @@ class _AuthLoginScreenState extends ConsumerState<AuthLoginScreen> {
       err = null;
     });
     try {
-      await ref.read(authNotifierProvider.notifier).login(_email.text.trim(), _password.text);
+      await ref.read(authNotifierProvider.notifier).login(
+            _email.text.trim(),
+            _password.text,
+            rememberMe: _rememberMe,
+          );
       final u = ref.read(authNotifierProvider).user;
       if (!mounted) return;
       if (u?.role == 'client') {
@@ -87,6 +112,11 @@ class _AuthLoginScreenState extends ConsumerState<AuthLoginScreen> {
                     'assets/branding/logo_al_asel.png',
                     height: 88,
                     fit: BoxFit.contain,
+                    errorBuilder: (_, __, ___) => SvgPicture.asset(
+                      'assets/branding/logo.svg',
+                      height: 88,
+                      fit: BoxFit.contain,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -133,6 +163,13 @@ class _AuthLoginScreenState extends ConsumerState<AuthLoginScreen> {
                           labelText: S.passwordLabel,
                           prefixIcon: const Icon(Icons.lock_outline_rounded),
                         ),
+                      ),
+                      CheckboxListTile(
+                        contentPadding: EdgeInsets.zero,
+                        value: _rememberMe,
+                        onChanged: loading ? null : (v) => setState(() => _rememberMe = v ?? false),
+                        title: Text(S.rememberLogin, style: GoogleFonts.cairo(fontSize: 14)),
+                        controlAffinity: ListTileControlAffinity.leading,
                       ),
                       if (err != null) ...[
                         const SizedBox(height: 12),

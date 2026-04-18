@@ -57,12 +57,27 @@ final artisanFollowStatusProvider = FutureProvider.autoDispose.family<bool, Stri
   return ref.watch(marketplaceRepositoryProvider).isFollowing(artisanId);
 });
 
+/// Clé stable `cat|city|avail` — évite les rechargements en boucle (Map recréée à chaque build).
+/// Si un métier est choisi et la liste est vide, on recharge **sans** filtre métier pour tester l’UI.
 final artisanListProvider =
-    FutureProvider.autoDispose.family<List<ArtisanModel>, Map<String, String?>>((ref, filters) async {
+    FutureProvider.autoDispose.family<List<ArtisanModel>, String>((ref, filterKey) async {
+  ref.keepAlive();
+  final parts = filterKey.split('|');
+  final cat = parts.isEmpty || parts[0].isEmpty ? null : parts[0];
+  final city = parts.length > 1 && parts[1].isNotEmpty ? parts[1] : null;
+  final onlyAvail = parts.length > 2 && parts[2] == '1';
   final repo = ref.watch(marketplaceRepositoryProvider);
-  return repo.listArtisans(
-    category: filters['category'],
-    city: filters['city'],
-    available: filters['available'] == 'true' ? true : null,
+  var list = await repo.listArtisans(
+    category: cat,
+    city: city,
+    available: onlyAvail ? true : null,
   );
+  if (list.isEmpty && cat != null) {
+    list = await repo.listArtisans(
+      category: null,
+      city: city,
+      available: onlyAvail ? true : null,
+    );
+  }
+  return list;
 });

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/constants/moroccan_trades.dart';
 import '../../core/l10n/strings.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/form_spacing.dart';
@@ -20,7 +21,7 @@ class _RequestScreenState extends ConsumerState<RequestScreen> {
   final _title = TextEditingController();
   final _desc = TextEditingController();
   final _city = TextEditingController();
-  String category = 'plumbing';
+  String category = moroccanTrades.first.id;
   double? sqm;
   String urgency = 'normal';
   Map<String, dynamic>? estimate;
@@ -76,14 +77,10 @@ class _RequestScreenState extends ConsumerState<RequestScreen> {
               value: category,
               decoration: const InputDecoration(labelText: S.fieldCategory),
               items: [
-                DropdownMenuItem(value: 'plumbing', child: Text(S.categoryLabel('plumbing'))),
-                DropdownMenuItem(value: 'painting', child: Text(S.categoryLabel('painting'))),
-                DropdownMenuItem(value: 'carpentry', child: Text(S.categoryLabel('carpentry'))),
-                DropdownMenuItem(value: 'electricity', child: Text(S.categoryLabel('electricity'))),
-                DropdownMenuItem(value: 'tiling', child: Text(S.categoryLabel('tiling'))),
-                DropdownMenuItem(value: 'hvac', child: Text(S.categoryLabel('hvac'))),
+                for (final t in moroccanTrades)
+                  DropdownMenuItem(value: t.id, child: Text(t.labelAr)),
               ],
-              onChanged: (v) => setState(() => category = v ?? 'plumbing'),
+              onChanged: (v) => setState(() => category = v ?? moroccanTrades.first.id),
             ),
             FormSpacing.betweenInputs,
             TextField(

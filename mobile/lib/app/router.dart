@@ -10,7 +10,9 @@ import '../presentation/screens/client_shell_screen.dart';
 import '../presentation/screens/inbox_screen.dart';
 import '../presentation/screens/create_post_screen.dart';
 import '../presentation/screens/email_verification_screen.dart';
+import '../presentation/screens/explore_screen.dart';
 import '../presentation/screens/report_problem_screen.dart';
+import '../presentation/screens/request_screen.dart';
 import '../presentation/screens/splash_screen.dart';
 
 final appRouter = GoRouter(
@@ -21,7 +23,13 @@ final appRouter = GoRouter(
     GoRoute(path: '/auth/register/client', builder: (context, state) => const AuthRegisterClientScreen()),
     GoRoute(path: '/auth/register/artisan', builder: (context, state) => const AuthRegisterArtisanScreen()),
     GoRoute(path: '/client', builder: (context, state) => const ClientShellScreen()),
+    GoRoute(path: '/explore', builder: (context, state) => const ExploreScreen()),
+    GoRoute(path: '/request', builder: (context, state) => const RequestScreen()),
     GoRoute(path: '/artisan', builder: (context, state) => const ArtisanShellScreen()),
+    GoRoute(
+      path: '/artisan-profile/:artisanId',
+      builder: (context, state) => ArtisanDetailScreen(artisanId: state.pathParameters['artisanId']!),
+    ),
     GoRoute(path: '/inbox', builder: (context, state) => const InboxScreen()),
     GoRoute(path: '/report', builder: (context, state) => const ReportProblemScreen()),
     GoRoute(path: '/verify-email', builder: (context, state) => const EmailVerificationScreen()),

@@ -1,10 +1,14 @@
 import * as db from '../db/index.js';
+import { isValidMoroccanTrade } from '../constants/moroccanTrades.js';
 
 export async function createRequest(req, res) {
   try {
     const { title, description, category, city, budgetMin, budgetMax, urgency } = req.body || {};
     if (!title || !category) {
       return res.status(400).json({ error: 'title and category required' });
+    }
+    if (!isValidMoroccanTrade(category)) {
+      return res.status(400).json({ error: 'category must be a valid traditional Moroccan craft id' });
     }
     const id = await db.addDoc('serviceRequests', {
       clientId: req.user.uid,
