@@ -1,37 +1,33 @@
 import 'package:flutter/foundation.dart' show defaultTargetPlatform, kIsWeb, TargetPlatform;
 
-/// Point to your deployed API or local dev server.
+/// API locale — port **4000**, routes sous `/api/v1`.
 ///
-/// **Port 4000** — l’URL par défaut pointe vers l’API locale sur ce port.
-///
-/// - **Windows / macOS / Linux / iOS simulateur** : `127.0.0.1` = votre machine.
-/// - **Émulateur Android** : `127.0.0.1` = l’émulateur lui-même, pas le PC. Sans
-///   `API_BASE`, l’app utilise `http://10.0.2.2:4000` (alias de localhost sur l’hôte).
-/// - **Téléphone Android réel** : définissez l’IP de votre PC, ex.
-///   `--dart-define=API_BASE=http://192.168.1.x:4000/api/v1`
-///
-/// **Important:** les routes sont sous `/api/v1`. Si vous ne passez que l’origine
-/// (ex. `http://127.0.0.1:4000`), `/api/v1` est ajouté automatiquement.
+/// Android : IP du PC sur le réseau (développement). Changez [_lanDevHost] si votre IP change.
+/// Autre plateforme : `127.0.0.1`.
+/// Surcharge build : `--dart-define=API_BASE=http://.../api/v1`
 class ApiConfig {
-  /// Vide = utiliser [_defaultBaseForPlatform] (émulateur Android → `10.0.2.2:4000`).
   static const String _apiBaseFromEnv = String.fromEnvironment('API_BASE', defaultValue: '');
 
-  /// Resolved API root, always including `/api/v1` when the env is origin-only.
+  /// IP du PC (cmd → `ipconfig` → IPv4). Téléphone et PC sur le même Wi‑Fi.
+  static const String _lanDevHost = '192.168.1.198';
+  static const int _apiPort = 4000;
+
   static String get baseUrl {
-    final raw = _apiBaseFromEnv.trim();
-    final origin = raw.isNotEmpty ? raw : _defaultBaseForPlatform();
-    return _normalizeApiBase(origin);
+    final fromEnv = _apiBaseFromEnv.trim();
+    if (fromEnv.isNotEmpty) {
+      return _normalizeApiBase(fromEnv);
+    }
+    return _normalizeApiBase(_defaultBaseForPlatform());
   }
 
   static String _defaultBaseForPlatform() {
-    if (kIsWeb) return 'http://127.0.0.1:4000/api/v1';
+    if (kIsWeb) return 'http://127.0.0.1:$_apiPort/api/v1';
     if (defaultTargetPlatform == TargetPlatform.android) {
-      return 'http://10.0.2.2:4000/api/v1';
+      return 'http://$_lanDevHost:$_apiPort/api/v1';
     }
-    return 'http://127.0.0.1:4000/api/v1';
+    return 'http://127.0.0.1:$_apiPort/api/v1';
   }
 
-  /// Origine HTTP pour Socket.IO (sans `/api/v1`).
   static String get socketOrigin {
     final u = baseUrl;
     final idx = u.indexOf('/api/v1');
@@ -41,8 +37,6 @@ class ApiConfig {
     return u.replaceAll(RegExp(r'/+$'), '');
   }
 
-  /// Lecture des vidéos servies sous `/uploads/...` : même hôte/port que l’API
-  /// (évite `localhost` vs `127.0.0.1` vs `10.0.2.2` selon ce que le serveur a renvoyé).
   static Uri resolvedMediaUri(String media) {
     final m = media.trim();
     if (m.isEmpty) {
@@ -56,7 +50,6 @@ class ApiConfig {
     if (u == null || !(u.scheme == 'http' || u.scheme == 'https')) {
       return Uri.parse(m);
     }
-    // Uniquement nos fichiers API : ne pas réécrire une URL CDN / autre domaine.
     if (u.path.startsWith('/uploads/')) {
       return Uri(
         scheme: origin.scheme,
@@ -72,7 +65,10 @@ class ApiConfig {
   static String _normalizeApiBase(String raw) {
     var u = raw.trim().replaceAll(RegExp(r'/+$'), '');
     if (u.isEmpty) {
-      return _defaultBaseForPlatform();
+      return _normalizeApiBase(_defaultBaseForPlatform());
+    }
+    if (!u.contains('://')) {
+      u = 'http://$u';
     }
     if (u.contains('/api/')) {
       return u;
@@ -80,10 +76,8 @@ class ApiConfig {
     return '$u/api/v1';
   }
 
-  /// Demo mode: backend with MEMORY_STORE=1 accepts X-Demo-Uid without Firebase.
   static const String demoUid = String.fromEnvironment('DEMO_UID', defaultValue: 'demo_client');
 
-  /// Separate demo identity so you can bootstrap an artisan profile without overwriting the client.
   static const String demoArtisanUid =
       String.fromEnvironment('DEMO_ARTISAN_UID', defaultValue: 'demo_artisan');
 }

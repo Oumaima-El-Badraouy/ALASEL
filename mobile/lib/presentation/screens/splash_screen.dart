@@ -9,7 +9,6 @@ import '../../core/auth/auth_notifier.dart';
 import '../../core/l10n/strings.dart';
 import '../../core/theme/app_colors.dart';
 import '../widgets/moroccan_pattern_background.dart';
-import '../widgets/moroccan_ui_kit.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
@@ -24,7 +23,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   Future<void> _navigateAfterSplash() async {
     final prefs = await SharedPreferences.getInstance();
     final longDone = prefs.getBool('splash_long_shown') ?? false;
-    final ms = longDone ? 1400 : 8000;
+    final ms = longDone ? 900 : 1600;
     await Future.delayed(Duration(milliseconds: ms));
     if (!longDone) await prefs.setBool('splash_long_shown', true);
     if (!mounted) return;
@@ -50,88 +49,50 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     return Scaffold(
       body: MoroccanPatternBackground(
         child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 28),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const SizedBox(height: 24),
-                DecoratedBox(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.gold.withValues(alpha: 0.25),
-                        blurRadius: 32,
-                        spreadRadius: 4,
-                      ),
-                    ],
-                  ),
-                  child: ClipOval(
-                    child: Container(
-                      color: AppColors.white.withValues(alpha: 0.85),
-                      padding: const EdgeInsets.all(12),
-                      child: Image.asset(
-                        'assets/branding/logo_al_asel.png',
-                        width: 280,
-                        fit: BoxFit.contain,
-                        errorBuilder: (_, __, ___) => SvgPicture.asset(
-                          'assets/branding/logo.svg',
-                          width: 140,
-                          height: 140,
-                        ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.gold.withValues(alpha: 0.25),
+                      blurRadius: 32,
+                      spreadRadius: 4,
+                    ),
+                  ],
+                ),
+                child: ClipOval(
+                  child: Container(
+                    color: AppColors.white.withValues(alpha: 0.85),
+                    padding: const EdgeInsets.all(12),
+                    child: Image.asset(
+                      'assets/branding/logo_al_asel.png',
+                      width: 280,
+                      fit: BoxFit.contain,
+                      errorBuilder: (_, __, ___) => SvgPicture.asset(
+                        'assets/branding/logo.svg',
+                        width: 140,
+                        height: 140,
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(height: 28),
-                const MoroccanGoldBand(width: 160),
-                const SizedBox(height: 20),
-                Text(
-                  S.appName,
-                  style: GoogleFonts.elMessiri(
-                    fontSize: 34,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 2,
-                    color: AppColors.deepBlue,
-                    height: 1.1,
-                  ),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                S.appName,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.elMessiri(
+                  fontSize: 32,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1.5,
+                  color: AppColors.deepBlue,
+                  height: 1.1,
                 ),
-                const SizedBox(height: 10),
-                Text(
-                  S.arabicSubtitle,
-                  style: GoogleFonts.elMessiri(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.terracotta.withValues(alpha: 0.95),
-                    height: 1.2,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  S.welcomeMediouna,
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.cairo(
-                    fontSize: 15,
-                    height: 1.45,
-                    color: AppColors.muted,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 36),
-                if (!auth.ready)
-                  const SizedBox(
-                    width: 36,
-                    height: 36,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 3,
-                      color: AppColors.terracotta,
-                    ),
-                  ),
-                const SizedBox(height: 48),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../core/auth/auth_notifier.dart';
 import '../../core/l10n/strings.dart';
+import '../../core/network/dio_error_message.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/form_spacing.dart';
 import '../widgets/moroccan_pattern_background.dart';
@@ -24,6 +25,7 @@ class _AuthRegisterClientScreenState extends ConsumerState<AuthRegisterClientScr
   final _email = TextEditingController();
   final _password = TextEditingController();
   final _phone = TextEditingController();
+  final _location = TextEditingController();
   bool mediouna = false;
   bool loading = false;
   String? _photoDataUrl;
@@ -35,6 +37,7 @@ class _AuthRegisterClientScreenState extends ConsumerState<AuthRegisterClientScr
     _email.dispose();
     _password.dispose();
     _phone.dispose();
+    _location.dispose();
     super.dispose();
   }
 
@@ -68,6 +71,13 @@ class _AuthRegisterClientScreenState extends ConsumerState<AuthRegisterClientScr
       );
       return;
     }
+    final loc = _location.text.trim();
+    if (loc.length < 2) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text(S.errLocationRequired)),
+      );
+      return;
+    }
     setState(() => loading = true);
     try {
       await ref.read(authNotifierProvider.notifier).registerClient(
@@ -76,12 +86,13 @@ class _AuthRegisterClientScreenState extends ConsumerState<AuthRegisterClientScr
             phone: tel,
             email: _email.text.trim(),
             password: _password.text,
+            location: loc,
             isMediounaVerified: true,
             photoUrl: _photoDataUrl,
           );
       if (mounted) context.go('/client');
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(friendlyDioError(e))));
     } finally {
       if (mounted) setState(() => loading = false);
     }
@@ -146,6 +157,15 @@ class _AuthRegisterClientScreenState extends ConsumerState<AuthRegisterClientScr
               decoration: InputDecoration(
                 labelText: '${S.fieldPhoneRequired} *',
                 hintText: '+212600000000',
+              ),
+            ),
+            FormSpacing.betweenInputs,
+            TextField(
+              controller: _location,
+              textCapitalization: TextCapitalization.sentences,
+              decoration: const InputDecoration(
+                labelText: S.fieldLocationRequired,
+                hintText: S.fieldLocationHint,
               ),
             ),
             CheckboxListTile(

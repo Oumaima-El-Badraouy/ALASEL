@@ -6,7 +6,6 @@ import { dirname, join } from 'path';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 let initialized = false;
-
 export function initFirebase() {
   if (initialized) return admin;
 

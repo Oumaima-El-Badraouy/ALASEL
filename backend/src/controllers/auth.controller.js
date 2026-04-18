@@ -50,7 +50,6 @@ export async function register(req, res) {
     if (existing) {
       return res.status(409).json({ error: 'Email already registered' });
     }
-
     const passwordHash = await bcrypt.hash(password, 10);
     const id = crypto.randomUUID();
 
@@ -60,9 +59,15 @@ export async function register(req, res) {
       const firstName = String(body.firstName || '').trim();
       const lastName = String(body.lastName || '').trim();
       const phone = String(body.phone || '').trim();
+      const location = String(body.location || '').trim();
       if (!firstName || !lastName || !phone) {
         return res.status(400).json({
           error: 'Client registration requires firstName, lastName, and phone.',
+        });
+      }
+      if (!location || location.length < 2) {
+        return res.status(400).json({
+          error: 'Client registration requires location (neighborhood / area, min 2 characters).',
         });
       }
       const name = `${firstName} ${lastName}`.trim();
@@ -83,6 +88,7 @@ export async function register(req, res) {
         description: null,
         isMediounaVerified: true,
         city: 'Mediouna',
+        location,
         passwordHash,
         createdAt: new Date().toISOString(),
         popularityScore: 0,
@@ -131,6 +137,12 @@ export async function register(req, res) {
           error: 'Artisan registration requires cinRectoUrl and cinVersoUrl (national ID photos).',
         });
       }
+      const location = String(body.location || '').trim();
+      if (!location || location.length < 2) {
+        return res.status(400).json({
+          error: 'Artisan registration requires location (neighborhood / area, min 2 characters).',
+        });
+      }
       userDoc = {
         id,
         role: 'artisan',
@@ -146,6 +158,7 @@ export async function register(req, res) {
         cinVersoUrl,
         isMediounaVerified: true,
         city: 'Mediouna',
+        location,
         passwordHash,
         createdAt: new Date().toISOString(),
         popularityScore: 0,
@@ -155,6 +168,7 @@ export async function register(req, res) {
         userId: id,
         displayName: fullName,
         bio: description,
+        location,
         categories: categories.length ? categories : ['general'],
         serviceAreas: ['Mediouna'],
         portfolio: [],

@@ -144,6 +144,7 @@ export async function patchMe(req, res) {
       'name',
       'phone',
       'city',
+      'location',
       'photoUrl',
       'firstName',
       'lastName',
@@ -175,7 +176,13 @@ export async function patchMe(req, res) {
     await db.docSet('users', req.user.uid, patch);
 
     const u2 = await db.docGet('users', req.user.uid);
-    if (u2.role === 'artisan' && (patch.bio !== undefined || patch.domain !== undefined || patch.name !== undefined)) {
+    if (
+      u2.role === 'artisan' &&
+      (patch.bio !== undefined ||
+        patch.domain !== undefined ||
+        patch.name !== undefined ||
+        patch.location !== undefined)
+    ) {
       const prof = await db.docGet('artisanProfiles', req.user.uid);
       if (prof) {
         const ap = { ...prof, updatedAt: new Date().toISOString() };
@@ -187,6 +194,7 @@ export async function patchMe(req, res) {
             .map((s) => s.trim())
             .filter(Boolean);
         }
+        if (patch.location !== undefined) ap.location = patch.location;
         ap.displayName = u2.name || u2.displayName || prof.displayName;
         await db.docSet('artisanProfiles', req.user.uid, ap);
       }

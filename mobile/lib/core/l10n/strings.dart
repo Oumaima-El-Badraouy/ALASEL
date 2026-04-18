@@ -15,7 +15,6 @@ class S {
   static const String homeCardArtisanTitle = 'فضاء الحرفي';
   static const String homeCardArtisanSubtitle = 'الملف، معرض قبل/بعد';
   static const String mediouna = 'مديونة';
-  static const String welcomeMediouna = 'حرفيون موثوقون — مديونة أولاً';
 
   // Shell / nav
   static const String messages = 'الرسائل';
@@ -106,8 +105,6 @@ class S {
   static const String notifNewComment = 'تعليق جديد على منشورك';
   static const String welcomeSnack = 'مرحباً بك في الأصل — مديونة';
 
-  // Splash
-  static const String arabicSubtitle = 'موثوقون في مديونة';
 
   // Auth
   static const String loginTitle = 'تسجيل الدخول';
@@ -120,7 +117,9 @@ class S {
   static const String registerClient = 'إنشاء حساب زبون';
   static const String registerArtisan = 'إنشاء حساب حرفي';
   static const String errApiUnreachable =
-      'تعذّر الاتصال بالخادم (منفذ 4000). شغّل الAPI على الجهاز. على هاتف حقيقي استخدم IP الحاسوب مع --dart-define=API_BASE=…';
+      'تعذّر الاتصال بالخادم. شغّل الAPI على الحاسوب (منفذ 4000، استماع 0.0.0.0) وتأكد أن الهاتف والحاسوب على نفس الواي فاي.';
+  static const String errApiTimeout =
+      'انتهت مهلة الاتصال. تحقق من الواي فاي، وجدار الحماية على الحاسوب، وأن عنوان IP الحاسوب لم يتغيّر.';
 
   // Vérification e-mail + CIN
   static const String verifyEmailTitle = 'تأكيد البريد';
@@ -145,6 +144,11 @@ class S {
   static const String fieldTraditionalTrade = 'المهنة التقليدية (المغرب)';
   static const String fieldDescriptionArtisanRequired = 'وصف النشاط (إلزامي، 10 أحرف على الأقل)';
   static const String fieldPhoneRequired = 'الهاتف (إلزامي)';
+  static const String fieldLocationRequired = 'الموقع / الحي (إلزامي)';
+  static const String fieldLocationHint = 'مثال: حي، دوار، نقطة قريبة منك';
+  static const String errLocationRequired = 'أدخل موقعك (حي أو منطقة، حرفان على الأقل).';
+  static const String locationSectionTitle = 'الموقع';
+  static const String saveLocationButton = 'حفظ';
   static const String fieldPasswordMin = 'كلمة المرور (6 أحرف على الأقل)';
   static const String mediounaConfirmLabel = 'أؤكد أنني ساكن في مديونة';
   static const String errMediounaRequired = 'يجب تأكيد الإقامة في مديونة.';

@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/auth/auth_notifier.dart';
 import '../../core/l10n/strings.dart';
+import '../../core/network/dio_error_message.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/form_spacing.dart';
 import '../widgets/moroccan_card.dart';
@@ -52,17 +53,6 @@ class _AuthLoginScreenState extends ConsumerState<AuthLoginScreen> {
     super.dispose();
   }
 
-  String _loginErrorMessage(Object e) {
-    final s = e.toString();
-    if (s.contains('Connection refused') ||
-        s.contains('SocketException') ||
-        s.contains('connection error') ||
-        s.contains('Failed host lookup')) {
-      return S.errApiUnreachable;
-    }
-    return s;
-  }
-
   Future<void> _submit() async {
     setState(() {
       loading = true;
@@ -82,7 +72,7 @@ class _AuthLoginScreenState extends ConsumerState<AuthLoginScreen> {
         context.go('/artisan');
       }
     } catch (e) {
-      setState(() => err = _loginErrorMessage(e));
+      setState(() => err = friendlyDioError(e));
     } finally {
       if (mounted) setState(() => loading = false);
     }
@@ -141,7 +131,7 @@ class _AuthLoginScreenState extends ConsumerState<AuthLoginScreen> {
                     height: 1.4,
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
                 MoroccanCard(
                   padding: const EdgeInsets.fromLTRB(18, 22, 18, 22),
                   child: Column(

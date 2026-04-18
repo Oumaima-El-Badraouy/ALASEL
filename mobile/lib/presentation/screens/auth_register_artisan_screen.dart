@@ -8,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../core/auth/auth_notifier.dart';
 import '../../core/constants/moroccan_trades.dart';
 import '../../core/l10n/strings.dart';
+import '../../core/network/dio_error_message.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/form_spacing.dart';
 import '../widgets/moroccan_pattern_background.dart';
@@ -25,6 +26,7 @@ class _AuthRegisterArtisanScreenState extends ConsumerState<AuthRegisterArtisanS
   final _phone = TextEditingController();
   final _email = TextEditingController();
   final _password = TextEditingController();
+  final _location = TextEditingController();
   bool mediouna = false;
   bool loading = false;
   String _tradeId = moroccanTrades.first.id;
@@ -39,6 +41,7 @@ class _AuthRegisterArtisanScreenState extends ConsumerState<AuthRegisterArtisanS
     _phone.dispose();
     _email.dispose();
     _password.dispose();
+    _location.dispose();
     super.dispose();
   }
 
@@ -103,6 +106,13 @@ class _AuthRegisterArtisanScreenState extends ConsumerState<AuthRegisterArtisanS
       );
       return;
     }
+    final loc = _location.text.trim();
+    if (loc.length < 2) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text(S.errLocationRequired)),
+      );
+      return;
+    }
     setState(() => loading = true);
     try {
       await ref.read(authNotifierProvider.notifier).registerArtisan(
@@ -112,6 +122,7 @@ class _AuthRegisterArtisanScreenState extends ConsumerState<AuthRegisterArtisanS
             phone: _phone.text.trim(),
             email: _email.text.trim(),
             password: _password.text,
+            location: loc,
             isMediounaVerified: true,
             photoUrl: _photoDataUrl,
             cinRectoUrl: _cinRectoDataUrl!,
@@ -119,7 +130,7 @@ class _AuthRegisterArtisanScreenState extends ConsumerState<AuthRegisterArtisanS
           );
       if (mounted) context.go('/artisan');
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(friendlyDioError(e))));
     } finally {
       if (mounted) setState(() => loading = false);
     }
@@ -182,6 +193,15 @@ class _AuthRegisterArtisanScreenState extends ConsumerState<AuthRegisterArtisanS
               controller: _phone,
               keyboardType: TextInputType.phone,
               decoration: const InputDecoration(labelText: S.fieldPhoneRequired),
+            ),
+            FormSpacing.betweenInputs,
+            TextField(
+              controller: _location,
+              textCapitalization: TextCapitalization.sentences,
+              decoration: const InputDecoration(
+                labelText: S.fieldLocationRequired,
+                hintText: S.fieldLocationHint,
+              ),
             ),
             FormSpacing.betweenInputs,
             TextField(

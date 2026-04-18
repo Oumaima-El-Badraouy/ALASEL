@@ -17,48 +17,57 @@ class AuthNotifier extends StateNotifier<AuthState> {
   static const _keySavedPassword = 'al_asel_saved_password';
 
   Future<void> hydrate() async {
-    final prefs = await SharedPreferences.getInstance();
-    final t = prefs.getString(_key);
-    if (t != null && t.isNotEmpty) {
-      state = AuthState(token: t, ready: false);
-      try {
-        final dio = _dio(t);
-        final res = await dio.get('/users/me');
-        final u = UserModel.fromJson(res.data as Map<String, dynamic>);
-        state = AuthState(token: t, user: u, ready: true);
-        return;
-      } catch (_) {
-        await prefs.remove(_key);
-      }
-    }
-    if (prefs.getBool(_keyRemember) == true) {
-      final email = prefs.getString(_keySavedEmail);
-      final password = prefs.getString(_keySavedPassword);
-      if (email != null &&
-          email.isNotEmpty &&
-          password != null &&
-          password.isNotEmpty) {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final t = prefs.getString(_key);
+      if (t != null && t.isNotEmpty) {
+        state = AuthState(token: t, ready: false);
         try {
-          await login(email, password, rememberMe: true);
+          final dio = _dio(t);
+          final res = await dio.get('/users/me');
+          final u = UserModel.fromJson(res.data as Map<String, dynamic>);
+          state = AuthState(token: t, user: u, ready: true);
           return;
         } catch (_) {
-          /* garder les champs sauvegardés pour saisie manuelle */
+          await prefs.remove(_key);
         }
       }
+      if (prefs.getBool(_keyRemember) == true) {
+        final email = prefs.getString(_keySavedEmail);
+        final password = prefs.getString(_keySavedPassword);
+        if (email != null &&
+            email.isNotEmpty &&
+            password != null &&
+            password.isNotEmpty) {
+          try {
+            await login(email, password, rememberMe: true);
+            return;
+          } catch (_) {
+            /* garder les champs sauvegardés pour saisie manuelle */
+          }
+        }
+      }
+      state = const AuthState(ready: true);
+    } catch (_) {
+      state = const AuthState(ready: true);
     }
-    state = const AuthState(ready: true);
+  }
+
+  BaseOptions _base({String? token}) {
+    return BaseOptions(
+      baseUrl: ApiConfig.baseUrl,
+      connectTimeout: const Duration(seconds: 15),
+      sendTimeout: const Duration(minutes: 2),
+      receiveTimeout: const Duration(minutes: 3),
+      headers: {
+        'Content-Type': 'application/json',
+        if (token != null) 'Authorization': 'Bearer $token',
+      },
+    );
   }
 
   Dio _dio(String token) {
-    return Dio(
-      BaseOptions(
-        baseUrl: ApiConfig.baseUrl,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      ),
-    );
+    return Dio(_base(token: token));
   }
 
   Future<void> login(
@@ -66,7 +75,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     String password, {
     bool? rememberMe,
   }) async {
-    final dio = Dio(BaseOptions(baseUrl: ApiConfig.baseUrl, headers: {'Content-Type': 'application/json'}));
+    final dio = Dio(_base());
     final res = await dio.post('/auth/login', data: {'email': email.trim(), 'password': password});
     final data = res.data as Map<String, dynamic>;
     final token = data['token'] as String;
@@ -91,10 +100,11 @@ class AuthNotifier extends StateNotifier<AuthState> {
     required String phone,
     required String email,
     required String password,
+    required String location,
     required bool isMediounaVerified,
     String? photoUrl,
   }) async {
-    final dio = Dio(BaseOptions(baseUrl: ApiConfig.baseUrl, headers: {'Content-Type': 'application/json'}));
+    final dio = Dio(_base());
     final res = await dio.post('/auth/register', data: {
       'role': 'client',
       'firstName': firstName.trim(),
@@ -102,6 +112,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       'phone': phone.trim(),
       'email': email.trim(),
       'password': password,
+      'location': location.trim(),
       'isMediounaVerified': isMediounaVerified,
       if (photoUrl != null && photoUrl.trim().isNotEmpty) 'photoUrl': photoUrl.trim(),
     });
@@ -120,12 +131,13 @@ class AuthNotifier extends StateNotifier<AuthState> {
     required String phone,
     required String email,
     required String password,
+    required String location,
     required bool isMediounaVerified,
     String? photoUrl,
     required String cinRectoUrl,
     required String cinVersoUrl,
   }) async {
-    final dio = Dio(BaseOptions(baseUrl: ApiConfig.baseUrl, headers: {'Content-Type': 'application/json'}));
+    final dio = Dio(_base());
     final res = await dio.post('/auth/register', data: {
       'role': 'artisan',
       'fullName': fullName,
@@ -134,6 +146,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       'phone': phone,
       'email': email.trim(),
       'password': password,
+      'location': location.trim(),
       'isMediounaVerified': isMediounaVerified,
       if (photoUrl != null && photoUrl.trim().isNotEmpty) 'photoUrl': photoUrl.trim(),
       'cinRectoUrl': cinRectoUrl.trim(),

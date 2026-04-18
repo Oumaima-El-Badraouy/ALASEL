@@ -12,6 +12,7 @@ final dioProvider = Provider<Dio>((ref) {
   final dio = Dio(
     BaseOptions(
       baseUrl: ApiConfig.baseUrl,
+      connectTimeout: const Duration(seconds: 25),
       sendTimeout: const Duration(minutes: 3),
       receiveTimeout: const Duration(minutes: 3),
       headers: {

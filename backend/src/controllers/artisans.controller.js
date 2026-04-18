@@ -121,6 +121,7 @@ export async function getArtisanFull(req, res) {
         photoUrl: user?.photoUrl ?? null,
         description: user?.description ?? profile.bio ?? '',
         domain: user?.domain ?? '',
+        location: profile.location ?? user?.location ?? '',
       },
       stats: {
         servicePostsCount: postsOut.length,

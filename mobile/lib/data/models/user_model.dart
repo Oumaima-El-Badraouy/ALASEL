@@ -12,6 +12,7 @@ class UserModel {
     this.description,
     this.isMediounaVerified,
     this.city,
+    this.location,
     this.photoUrl,
     this.displayName,
     this.popularityScore,
@@ -32,6 +33,8 @@ class UserModel {
   final String? description;
   final bool? isMediounaVerified;
   final String? city;
+  /// Quartier / zone précise (saisie à l'inscription ou profil).
+  final String? location;
   final String? photoUrl;
   final String? displayName;
   final int? popularityScore;
@@ -55,6 +58,7 @@ class UserModel {
       description: j['description'] as String? ?? j['bio'] as String?,
       isMediounaVerified: j['isMediounaVerified'] as bool? ?? j['mediounaResident'] as bool?,
       city: j['city'] as String?,
+      location: j['location'] as String?,
       photoUrl: j['photoUrl'] as String?,
       displayName: j['displayName'] as String?,
       popularityScore: (j['popularityScore'] as num?)?.toInt(),

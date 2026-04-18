@@ -25,6 +25,38 @@ final _followingCountProvider = FutureProvider.autoDispose<int>((ref) async {
   return (m['count'] as num?)?.toInt() ?? 0;
 });
 
+Future<void> _editClientLocation(BuildContext context, WidgetRef ref, String? current) async {
+  final c = TextEditingController(text: current ?? '');
+  final ok = await showDialog<bool>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: const Text(S.locationSectionTitle),
+      content: TextField(
+        controller: c,
+        autofocus: true,
+        maxLines: 2,
+        decoration: const InputDecoration(
+          labelText: S.fieldLocationRequired,
+          hintText: S.fieldLocationHint,
+        ),
+      ),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text(S.cancel)),
+        FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text(S.saveLocationButton)),
+      ],
+    ),
+  );
+  final text = c.text.trim();
+  c.dispose();
+  if (ok != true || !context.mounted) return;
+  if (text.length < 2) {
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text(S.errLocationRequired)));
+    return;
+  }
+  await ref.read(marketplaceRepositoryProvider).patchMe({'location': text});
+  await ref.read(authNotifierProvider.notifier).refreshMe();
+}
+
 class ClientProfileScreen extends ConsumerWidget {
   const ClientProfileScreen({super.key});
 
@@ -113,6 +145,35 @@ class ClientProfileScreen extends ConsumerWidget {
                         ),
                         const SizedBox(height: 4),
                         Text(u.email, style: const TextStyle(color: AppColors.muted, fontSize: 13)),
+                        const SizedBox(height: 10),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(Icons.place_outlined, size: 20, color: AppColors.deepBlue.withValues(alpha: 0.75)),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    S.locationSectionTitle,
+                                    style: TextStyle(fontSize: 12, color: AppColors.muted.withValues(alpha: 0.95)),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    (u.location != null && u.location!.trim().isNotEmpty) ? u.location!.trim() : '—',
+                                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.edit_outlined, size: 20),
+                              tooltip: S.saveLocationButton,
+                              onPressed: () => _editClientLocation(context, ref, u.location),
+                            ),
+                          ],
+                        ),
                         if (u.isMediounaVerified == true) ...[
                           const SizedBox(height: 8),
                           Row(

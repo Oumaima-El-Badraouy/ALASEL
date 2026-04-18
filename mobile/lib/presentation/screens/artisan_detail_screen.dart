@@ -65,6 +65,22 @@ class ArtisanDetailScreen extends ConsumerWidget {
                               style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.deepBlue),
                             ),
                           ],
+                          if (d.location != null && d.location!.trim().isNotEmpty) ...[
+                            const SizedBox(height: 8),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Icon(Icons.place_outlined, size: 18, color: AppColors.muted.withValues(alpha: 0.9)),
+                                const SizedBox(width: 6),
+                                Expanded(
+                                  child: Text(
+                                    d.location!.trim(),
+                                    style: const TextStyle(fontSize: 13, color: AppColors.ink),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ],
                       ),
                     ),

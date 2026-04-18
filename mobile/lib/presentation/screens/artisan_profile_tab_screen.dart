@@ -39,6 +39,7 @@ class _ArtisanProfileTabScreenState extends ConsumerState<ArtisanProfileTabScree
   final _phone = TextEditingController();
   final _domain = TextEditingController();
   final _description = TextEditingController();
+  final _location = TextEditingController();
   bool loading = true;
   bool saving = false;
   bool _uploadingPhoto = false;
@@ -50,6 +51,7 @@ class _ArtisanProfileTabScreenState extends ConsumerState<ArtisanProfileTabScree
     _phone.dispose();
     _domain.dispose();
     _description.dispose();
+    _location.dispose();
     super.dispose();
   }
 
@@ -68,6 +70,7 @@ class _ArtisanProfileTabScreenState extends ConsumerState<ArtisanProfileTabScree
     _phone.text = u.phone ?? '';
     _domain.text = u.domain ?? '';
     _description.text = u.description ?? '';
+    _location.text = u.location ?? '';
   }
 
   Future<void> _load() async {
@@ -112,6 +115,7 @@ class _ArtisanProfileTabScreenState extends ConsumerState<ArtisanProfileTabScree
         'firstName': _firstName.text.trim(),
         'lastName': _lastName.text.trim(),
         'phone': _phone.text.trim(),
+        'location': _location.text.trim(),
         'domain': _domain.text.trim(),
         'description': _description.text.trim(),
       });
@@ -273,6 +277,16 @@ class _ArtisanProfileTabScreenState extends ConsumerState<ArtisanProfileTabScree
                     decoration: const InputDecoration(
                       labelText: S.phoneFieldLabel,
                       hintText: S.phoneFieldHint,
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  FormSpacing.betweenInputs,
+                  TextField(
+                    controller: _location,
+                    textCapitalization: TextCapitalization.sentences,
+                    decoration: const InputDecoration(
+                      labelText: S.fieldLocationRequired,
+                      hintText: S.fieldLocationHint,
                       border: OutlineInputBorder(),
                     ),
                   ),

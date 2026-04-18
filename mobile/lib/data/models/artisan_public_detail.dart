@@ -10,6 +10,7 @@ class ArtisanPublicDetail {
     required this.lastName,
     required this.fullName,
     required this.description,
+    this.location,
     required this.servicePostsCount,
     required this.demandsInTradeCount,
     required this.posts,
@@ -22,6 +23,7 @@ class ArtisanPublicDetail {
   final String? lastName;
   final String fullName;
   final String description;
+  final String? location;
   final int servicePostsCount;
   final int demandsInTradeCount;
   final List<PostModel> posts;
@@ -40,6 +42,7 @@ class ArtisanPublicDetail {
       lastName: u['lastName'] as String?,
       fullName: u['name'] as String? ?? '',
       description: u['description'] as String? ?? '',
+      location: u['location'] as String?,
       servicePostsCount: (st['servicePostsCount'] as num?)?.toInt() ?? 0,
       demandsInTradeCount: (st['demandsInTradeCount'] as num?)?.toInt() ?? 0,
       posts: posts,
